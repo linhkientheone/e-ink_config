@@ -136,7 +136,20 @@
     <div class="flex flex-wrap gap-3 md:gap-4 mb-6">
       <!-- Tab 1: Xanh dương đậm (Indigo/Blue) -->
       <button onclick="switchTab('tab1')" id="tab1-btn" class="flex-1 min-w-[150px] justify-center bg-amber-500 text-white px-5 py-3 rounded-xl flex items-center gap-2 font-semibold shadow-md shadow-indigo-100 transition-all">
-        <i class="fa fa-bluetooth"></i> Quản lý thiết bị
+        <i class="fa fa-mobile"></i>
+        <span class="flex flex-col text-center leading-tight">
+          <span>Quản lý</span>
+          <span>thiết bị</span>
+        </span>
+      </button>
+
+      <!-- Tab 4: Giao diện đồng hồ mới -->
+      <button onclick="switchTab('tab4')" id="tab4-btn" class="flex-1 min-w-[130px] justify-center bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-600 px-4 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+          <i class="fa fa-clock-o"></i>
+          <span class="flex flex-col text-center leading-tight">
+            <span>Giao diện</span>
+            <span>đồng hồ</span>
+          </span>
       </button>
 
       <!-- Tab 2: Xanh ngọc (Teal) -->
@@ -148,6 +161,8 @@
       <button onclick="switchTab('tab3')" id="tab3-btn" class="flex-1 min-w-[150px] justify-center bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-600 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
         <i class="fa fa-refresh"></i> Update Firmware
       </button>
+
+
     </div>
 
 
@@ -234,42 +249,42 @@
               <label for="threshold-slider">Ngưỡng (chế độ Đen&Trắng):</label>
               <span id="threshold-value" class="text-indigo-600 font-bold">128</span>
             </div>
-            <input type="range" id="threshold-slider" min="0" max="255" value="128" class="w-full accent-indigo-600 cursor-pointer" oninput="applyThreshold()">
+            <input type="range" id="threshold-slider" min="0" max="255" value="128" class="watch-face-btn w-full accent-indigo-600 cursor-pointer" oninput="applyThreshold()">
           </div>
 
             <!-- Hàng 1: Tải lại & Kéo giãn vừa màn -->
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="reloadImage()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="reloadImage()" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-refresh"></i> Tải lại
               </button>
-              <button onclick="fitImageStretch()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="fitImageStretch()" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-arrows-alt"></i> Kéo giãn vừa màn
               </button>
             </div>
 
             <!-- Hàng 2: Vừa khít màn hình & Đặt lại 100% -->
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="fitImageContain()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="fitImageContain()" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-compress"></i> Vừa khít màn hình
               </button>
-              <button onclick="resetImageScale()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="resetImageScale()" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-search"></i> Đặt lại 100%
               </button>
             </div>
 
             <!-- Hàng 3: Xoay thuận 90° & Xoay ngược 90° -->
             <div class="grid grid-cols-2 gap-2">
-              <button onclick="rotateImage(90)" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="rotateImage(90)" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-rotate-right"></i> Xoay thuận 90°
               </button>
-              <button onclick="rotateImage(-90)" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="rotateImage(-90)" class="watch-face-btn bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-rotate-left"></i> Xoay ngược 90°
               </button>
             </div>
 
             <!-- Hàng 4: Đặt lại xoay (chiếm trọn chiều ngang) -->
             <div>
-              <button onclick="resetImageRotation()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+              <button onclick="resetImageRotation()" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
                 <i class="fa fa-undo"></i> Đặt lại xoay
               </button>
             </div>
@@ -288,7 +303,7 @@
         <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 text-center py-8">
           <!-- Khung chứa căn giữa 2 nút -->
           <div class="w-full flex justify-center">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl">
+            <div class="grid grid-cols-1 sm:grid-cols-1 gap-4 w-full max-w-xl">
               <!-- Nút 1: Cập nhật Firmware -->
               <button id="upfirm-button" onclick="onUpdate()" class="bg-accent text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 shadow-md hover:opacity-95 transition-all">
                 <i class="fa fa-refresh"></i> Cập nhật Firmware
@@ -314,6 +329,222 @@
 
         </div>
       </div>
+
+        <!-- TAB 4: Giao diện đồng hồ (Watch Faces) -->
+        <div id="tab4-content" class="tab-content hidden space-y-4">
+            <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-gray-700 text-lg flex items-center gap-2">
+                <i class="fa fa-th-large text-amber-500"></i> Chọn mẫu giao diện màn hình
+                </h3>
+                <span class="text-xs text-gray-400">Kích thước tham khảo: 212 x 104 pixels</span>
+            </div>
+
+            <!-- Lưới danh sách các giao diện đồng hồ -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                <!-- Mẫu 1 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <!-- Hiển thị ảnh trực tiếp -->
+                    <img src="images/mau_1.jpg" alt="Mẫu 1" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 1</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(0)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 2 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_2.jpg" alt="Mẫu 2" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 2</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(1)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 3 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_3.jpg" alt="Mẫu 3" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 3</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cácht</p>
+                    <button onclick="selectWatchFace(2)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 4 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_4.jpg" alt="Mẫu 4" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 4</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(3)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 5 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_5.jpg" alt="Mẫu 5" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 5</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(4)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 6 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_6.jpg" alt="Mẫu 6" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 6</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(5)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 7 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img src="images/mau_7.jpg" alt="Mẫu 7" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full text-center">
+                    <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 7</h4>
+                    <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                    <button onclick="selectWatchFace(6)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                    Áp dụng mẫu này
+                    </button>
+                </div>
+                </div>
+
+                <!-- Mẫu 8 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_8.jpg" alt="Mẫu 8" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 8</h4>
+                      <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                      <button onclick="selectWatchFace(7)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 9 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_9.jpg" alt="Mẫu 9" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 9</h4>
+                      <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                      <button onclick="selectWatchFace(8)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 10 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_10.jpg" alt="Mẫu 10" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 10</h4>
+                      <p class="text-xs text-gray-500 mb-3">Đồng hồ số phong cách</p>
+                      <button onclick="selectWatchFace(9)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 11 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_11.jpg" alt="Mẫu 11" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 11</h4>
+                      <p class="text-xs text-gray-500 mb-3">Đồng hồ số + lịch tháng</p>
+                      <button onclick="selectWatchFace(10)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 12 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_12.jpg" alt="Mẫu 12" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 12</h4>
+                      <p class="text-xs text-gray-500 mb-3">Lịch tháng</p>
+                      <button onclick="selectWatchFace(11)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 13 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_13.jpg" alt="Mẫu 13" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 13</h4>
+                      <p class="text-xs text-gray-500 mb-3">Lịch tháng có cả âm lịch</p>
+                      <button onclick="selectWatchFace(12)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+                <!-- Mẫu 14 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_14.jpg" alt="Mẫu 14" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 14</h4>
+                      <p class="text-xs text-gray-500 mb-3">Hiển thị hình ảnh</p>
+                      <button onclick="selectWatchFace(13)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
+
+
+
+            </div>
+            </div>
+        </div>
 
       <!-- 日志终端区域 -->
       <div class="space-y-2">
@@ -483,7 +714,7 @@
 
         console.log('Đang yêu cầu kết nối thiết bị...');
         device = await navigator.bluetooth.requestDevice({
-          filters: [{ namePrefix: "DLG-CLOCK" }],
+          filters: [{ namePrefix: "ONE-" }],
           optionalServices: [ 0xff00 ]
         });
         console.log('Tên thiết bị:', device.name);
@@ -539,6 +770,8 @@
         document.getElementById('send90-button').classList.remove('opacity-50', 'cursor-not-allowed');
         document.getElementById('calibration-button').classList.remove('opacity-50', 'cursor-not-allowed');
 
+        enableWatchFaceButtons();
+
         connectButton.innerHTML = '<i class="fa fa-disconnect"></i> Ngắt kết nối';
         connectButton.disabled = false;
       } catch (error) {
@@ -551,7 +784,7 @@
     async function onSetTime() {
       const setimeButton = document.getElementById('setime-button');
       setimeButton.disabled = true;
-      setimeButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 同步中...';
+      setimeButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang đồng bộ...';
 
       try {
         // 等待整秒时间
@@ -740,7 +973,11 @@
     }
 
 	async function onCalibration() {
-		document.getElementById('calibration-button').disabled = true;
+		// document.getElementById('calibration-button').disabled = true;
+    const calibButton = document.getElementById('calibration-button');
+      calibButton.disabled = true;
+      calibButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang hiệu chỉnh...';
+
 
 		var minute, second, last_minute, cal_minute;
 
@@ -791,7 +1028,10 @@
 
 			console.log('Quá trình hiệu chuẩn hoàn tất.');
 		}
-		document.getElementById('calibration-button').disabled = false;
+		// document.getElementById('calibration-button').disabled = false;
+
+    calibButton.innerHTML = '<i class="fa fa-wrench"></i> Căn chỉnh thời gian';
+    calibButton.disabled = false;
 	}
 
     // 断开连接
@@ -835,6 +1075,8 @@
       connectButton.innerHTML = '<i class="fa fa-bluetooth"></i> Kết nối thiết bị';
       connectButton.disabled = false;
 
+      disableWatchFaceButtons();
+
       console.log('Thiết bị đã bị ngắt kết nối.');
     }
 
@@ -852,7 +1094,7 @@
       });
 
       // Reset style tất cả các nút tab về trạng thái không active (màu xám)
-      ['tab1-btn', 'tab2-btn', 'tab3-btn'].forEach(btnId => {
+      ['tab1-btn', 'tab2-btn', 'tab3-btn', 'tab4-btn'].forEach(btnId => {
           const btn = document.getElementById(btnId);
           btn.className = "flex-1 min-w-[150px] justify-center bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-300 transition-all";
       });
@@ -1219,6 +1461,7 @@
     // Chạy khởi tạo kích thước canvas lần đầu khi load trang
     window.addEventListener('DOMContentLoaded', () => {
         updateCanvasSize();
+        disableWatchFaceButtons();
     });
 
     async function onUpdateFont() {
@@ -1316,6 +1559,74 @@
         }
     }
 
+    // Hàm xử lý khi người dùng bấm chọn một mẫu giao diện
+    async function selectWatchFace(faceId) {
+        console.log(`Đã chọn giao diện đồng hồ số: ${faceId}`);
+        if (typeof addLog === 'function') {
+            addLog(`Đã gửi lệnh đổi giao diện sang mẫu số ${faceId}`);
+        }
+        // Ở đây bạn có thể viết thêm lệnh Bluetooth gửi mã lệnh chọn giao diện xuống thiết bị (nếu có)
+        let buf = new Uint8Array(3);
+        buf.fill(0xff); // Điền giá trị trống mặc định
+        buf[0] = 0x93;  // Mã lệnh bắt tay truyền ảnh
+        buf[1] = faceId;
+        buf[2] = 0x00;
+        // Gửi qua Bluetooth (giả định longValue là characteristic Bluetooth đã kết nối)
+        await longValue.writeValue(buf);
+    }
+
+    // Hàm khóa toàn bộ nút giao diện đồng hồ
+    function disableWatchFaceButtons() {
+        document.querySelectorAll('.watch-face-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            // Thêm dòng này nếu muốn đổi màu sang xám khi bị disable
+            btn.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+            btn.classList.add('bg-gray-400');
+        });
+
+        // Khóa nút "Tải xuống thiết bị"
+        const uploadBtn = document.getElementById('upload-btn');
+        if (uploadBtn) {
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        const upFwBtn = document.getElementById('upfirm-button');
+        if (upFwBtn) {
+            upFwBtn.disabled = true;
+            upFwBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        // // Khóa các nút giao diện đồng hồ (Tab 4)
+        // document.querySelectorAll('.watch-face-btn').forEach(btn => {
+        //     btn.disabled = true;
+        //     btn.classList.add('opacity-50', 'cursor-not-allowed');
+        // });
+
+    }
+
+    // Hàm mở khóa lại khi thiết bị đã kết nối thành công
+    function enableWatchFaceButtons() {
+        document.querySelectorAll('.watch-face-btn').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-400');
+            btn.classList.add('bg-amber-500', 'hover:bg-amber-600');
+        });
+
+        // Mở khóa nút "Tải xuống thiết bị"
+        const uploadBtn = document.getElementById('upload-btn');
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        const upFwBtn = document.getElementById('upfirm-button');
+        if (upFwBtn) {
+            upFwBtn.disabled = false;
+            upFwBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+    }
   </script>
 </body>
 </html>
