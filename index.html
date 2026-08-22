@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[LK1] E-Ink webconfig</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#8B5CF6',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            dark: '#1E293B',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .btn-hover {
+        @apply transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5;
+      }
+      .card-effect {
+        @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+      }
+      .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+      }
+    }
+  </style>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f9ff;
+      background-image:
+        radial-gradient(at 40% 20%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 80% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 0% 50%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+    }
+
+    .log-entry {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-6 flex justify-center items-start font-inter text-dark">
+  <div class="w-full max-w-4xl">
+    <!-- 头部标题 -->
+    <header class="mb-6 text-center">
+      <h1 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-gradient mb-2">Cài đặt màn hình E-Ink</h1>
+    </header>
+
+    <!-- Trạng thái thiết bị và hệ thống -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <i class="fa fa-microchip"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">Tên thiết bị</p>
+          <p id="device_name" class="font-semibold">Chưa có kết nối</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning">
+          <i class="fa fa-bolt"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">Điện áp hiện tại</p>
+          <p id="current_voltage" class="font-semibold">--.- V</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+          <i class="fa fa-calendar"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">Thời gian thiết bị</p>
+          <p id="current_time" class="font-semibold">--:--:--</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+          <i class="fa fa-laptop"></i>
+        </div>
+        <div>
+          <p class="text-gray-500 text-sm">Thời gian hệ thống</p>
+          <p id="system_time" class="font-semibold">Đang tải...</p>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 主内容卡片 -->
+    <div class="card-effect p-5 md:p-6 space-y-6">
+
+    <!-- === THANH CHUYỂN ĐỔI TAB CHÍNH (3 Tab) === -->
+    <div class="flex flex-wrap gap-3 md:gap-4 mb-6">
+      <!-- Tab 1: Xanh dương đậm (Indigo/Blue) -->
+      <button onclick="switchTab('tab1')" id="tab1-btn" class="flex-1 min-w-[150px] justify-center bg-amber-500 text-white px-5 py-3 rounded-xl flex items-center gap-2 font-semibold shadow-md shadow-indigo-100 transition-all">
+        <i class="fa fa-bluetooth"></i> Quản lý thiết bị
+      </button>
+
+      <!-- Tab 2: Xanh ngọc (Teal) -->
+      <button onclick="switchTab('tab2')" id="tab2-btn" class="flex-1 min-w-[150px] justify-center bg-gray-100 text-gray-600 hover:bg-teal-50 hover:text-teal-600 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+        <i class="fa fa-image"></i> Truyền hình ảnh
+      </button>
+
+      <!-- Tab 3: Tím (Purple) -->
+      <button onclick="switchTab('tab3')" id="tab3-btn" class="flex-1 min-w-[150px] justify-center bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-600 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+        <i class="fa fa-refresh"></i> Update Firmware
+      </button>
+    </div>
+
+
+      <!-- === KHU VỰC NỘI DUNG CÁC TAB === -->
+      <!-- TAB 1: Quản lý thiết bị -->
+      <div id="tab1-content" class="tab-content space-y-4">
+
+        <div class="p-4 bg-gray-50/80 border border-gray-200/80 rounded-xl space-y-3">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Thao tác thiết bị</span>
+
+          <!-- Dùng CSS Grid để chia đều 4 nút trên màn hình lớn và tự động xuống dòng/cân đối trên màn hình nhỏ -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <button id="connect-button" class="bg-primary text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium shadow-sm transition-all">
+              <i class="fa fa-bluetooth"></i>
+              <span class="flex flex-col text-center leading-tight">
+                <span>Kết nối</span>
+                <span>thiết bị</span>
+              </span>
+            </button>
+            <button id="setime-button" class="bg-warning text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium opacity-50 cursor-not-allowed shadow-sm transition-all" disabled>
+              <i class="fa fa-clock-o"></i>
+              <span class="flex flex-col text-center leading-tight">
+                <span>Đồng bộ</span>
+                <span>thời gian</span>
+              </span>
+            </button>
+            <button id="send90-button" class="bg-secondary text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium opacity-50 cursor-not-allowed shadow-sm transition-all" disabled>
+              <i class="fa fa-send"></i>
+              <span class="flex flex-col text-center leading-tight">
+                <span>Chuyển đổi</span>
+                <span>chế độ</span>
+              </span>
+            </button>
+            <button id="calibration-button" class="bg-purple-500 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium opacity-50 cursor-not-allowed shadow-sm transition-all" disabled>
+              <i class="fa fa-wrench"></i>
+              <span class="flex flex-col text-center leading-tight">
+                <span>Căn chỉnh</span>
+                <span>thời gian</span>
+              </span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- TAB 2: Truyền hình ảnh -->
+      <div id="tab2-content" class="tab-content hidden space-y-4">
+        <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center space-y-4">
+
+          <!-- 1. Chọn kích thước màn hình -->
+          <div class="w-full max-w-md flex flex-col gap-1.5">
+            <label for="screen-size-select" class="text-sm font-semibold text-gray-700">Chọn loại màn hình E-Ink:</label>
+            <select id="screen-size-select" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-800" onchange="updateCanvasSize()">
+              <option value="212x104">2.13 inch (212 x 104 pixels)</option>
+              <option value="250x144">2.13 inch (250 x 144 pixels)</option>
+            </select>
+          </div>
+
+          <!-- 2. Nút chọn ảnh từ máy -->
+          <div class="w-full max-w-md flex flex-col gap-1.5">
+            <label class="text-sm font-semibold text-gray-700">Chọn hình ảnh tải lên:</label>
+            <input type="file" id="image-file-input" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/25 cursor-pointer border border-gray-200 rounded-lg p-1">
+          </div>
+
+          <!-- Thanh trượt điều chỉnh ngưỡng đen trắng -->
+          <!-- <div class="w-full max-w-md flex flex-col gap-1.5 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+            <div class="flex justify-between items-center text-sm font-semibold text-gray-700">
+              <label for="threshold-slider">Ngưỡng (chế độ Đen&Trắng):</label>
+              <span id="threshold-value" class="text-indigo-600 font-bold">128</span>
+            </div>
+            <input type="range" id="threshold-slider" min="0" max="255" value="128" class="w-full accent-indigo-600 cursor-pointer" oninput="applyThreshold()">
+          </div> -->
+
+          <!-- 3. Canvas hiển thị Preview (có viền nhẹ để dễ nhìn ảnh trắng) -->
+          <div class="p-2 bg-gray-50 border border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden">
+            <canvas id="canvas" class="border border-gray-300 shadow-sm bg-white"></canvas>
+          </div>
+
+          <!-- Nhóm nút điều khiển ảnh -->
+          <div class="w-full max-w-md p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Công cụ chỉnh sửa ảnh</span>
+          <!-- Thanh trượt điều chỉnh ngưỡng đen trắng -->
+          <div class="w-full max-w-md flex flex-col gap-1.5 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+            <div class="flex justify-between items-center text-sm font-semibold text-gray-700">
+              <label for="threshold-slider">Ngưỡng (chế độ Đen&Trắng):</label>
+              <span id="threshold-value" class="text-indigo-600 font-bold">128</span>
+            </div>
+            <input type="range" id="threshold-slider" min="0" max="255" value="128" class="w-full accent-indigo-600 cursor-pointer" oninput="applyThreshold()">
+          </div>
+
+            <!-- Hàng 1: Tải lại & Kéo giãn vừa màn -->
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="reloadImage()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-refresh"></i> Tải lại
+              </button>
+              <button onclick="fitImageStretch()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-arrows-alt"></i> Kéo giãn vừa màn
+              </button>
+            </div>
+
+            <!-- Hàng 2: Vừa khít màn hình & Đặt lại 100% -->
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="fitImageContain()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-compress"></i> Vừa khít màn hình
+              </button>
+              <button onclick="resetImageScale()" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-search"></i> Đặt lại 100%
+              </button>
+            </div>
+
+            <!-- Hàng 3: Xoay thuận 90° & Xoay ngược 90° -->
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="rotateImage(90)" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-rotate-right"></i> Xoay thuận 90°
+              </button>
+              <button onclick="rotateImage(-90)" class="bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-rotate-left"></i> Xoay ngược 90°
+              </button>
+            </div>
+
+            <!-- Hàng 4: Đặt lại xoay (chiếm trọn chiều ngang) -->
+            <div>
+              <button onclick="resetImageRotation()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-all shadow-sm">
+                <i class="fa fa-undo"></i> Đặt lại xoay
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Nút "Tải xuống thiết bị" (Upload) -->
+          <button id="upload-btn" onclick="upload_image()" class="w-full max-w-md bg-accent text-white py-3 rounded-lg font-medium flex items-center justify-center gap-2 shadow-md hover:opacity-95 transition-all">
+            <i class="fa fa-cloud-upload"></i> Tải xuống thiết bị
+          </button>
+
+        </div>
+      </div>
+
+      <!-- TAB 3: Cập nhật Firmware -->
+      <div id="tab3-content" class="tab-content hidden space-y-4">
+        <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 text-center py-8">
+          <!-- Khung chứa căn giữa 2 nút -->
+          <div class="w-full flex justify-center">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl">
+              <!-- Nút 1: Cập nhật Firmware -->
+              <button id="upfirm-button" onclick="onUpdate()" class="bg-accent text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 shadow-md hover:opacity-95 transition-all">
+                <i class="fa fa-refresh"></i> Cập nhật Firmware
+              </button>
+
+              <!-- Nút 2: Ghi Font Data -->
+              <!-- <button id="upfont-button" onclick="onUpdateFont()" class="bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2 shadow-md hover:bg-indigo-700 transition-all">
+                <i class="fa fa-font"></i> Ghi Font Data
+              </button> -->
+            </div>
+          </div>
+          <br>
+          <br>
+          <!-- 进度条区域 -->
+          <div id="progress-container">
+            <p class="text-sm font-medium text-gray-600 mb-1">Tiến trình cập nhật Firmware</p>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div id="update_progress_bar" class="h-full bg-gradient-to-r from-primary to-accent w-0 transition-all duration-300"></div>
+            </div>
+            <p id="update_progress_text" class="text-xs text-gray-500 mt-1">0%</p>
+            <div id="update_progress" class="hidden"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 日志终端区域 -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-gray-700 flex items-center gap-2">
+            <i class="fa fa-terminal text-primary"></i> Nhật ký hệ thống
+          </h3>
+          <button id="clear-log-btn" class="text-xs text-gray-500 hover:text-danger transition-colors">
+            <i class="fa fa-trash-o"></i> Xóa nhật ký
+          </button>
+        </div>
+
+        <div id="log-window" class="bg-gray-900 text-gray-100 text-xs md:text-sm rounded-lg h-48 md:h-64 overflow-y-auto p-3 font-mono">
+          <div class="text-gray-400 log-entry">Thiết bị đã được khởi động và đang chờ kết nối thiết bị....</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 页脚信息 -->
+    <footer class="mt-6 text-center text-xs text-gray-500">
+      <p>e-Ink clock &copy; https://github.com/lihkientheone/eink_config</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.sheetjs.com/crc-32-latest/package/crc32.js"></script>
+
+  <script>
+
+    function hexToBytes(hex) {
+        for (var bytes = [], c = 0; c < hex.length; c += 2)
+            bytes.push(parseInt(hex.substr(c, 2), 16));
+        return new Uint8Array(bytes);
+    }
+    function bytesToHex(data) {
+        return new Uint8Array(data).reduce(
+            function (memo, i) {
+                return memo + ("0" + i.toString(16)).slice(-2);
+            }, "");
+    }
+    function intToHex(intIn, bytes = 4) {
+        return intIn.toString(16).padStart(bytes * 2, '0');
+    }
+
+    // 系统时间更新
+    function updateSystemTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const dateString = now.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+      document.getElementById('system_time').textContent = `${dateString} ${timeString}`;
+    }
+
+    // 初始化更新系统时间并设置定时器
+    updateSystemTime();
+    setInterval(updateSystemTime, 1000);
+
+    // 日志系统
+    const logWindow = document.getElementById('log-window');
+    const clearLogBtn = document.getElementById('clear-log-btn');
+
+    // 自定义日志函数
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      const logLine = document.createElement('div');
+      logLine.className = 'log-entry mb-1 border-b border-gray-800 pb-1';
+
+      let typeIcon = '';
+      let typeColor = '';
+
+      switch(type) {
+        case 'success':
+          typeIcon = '<span class="text-green-400 mr-1"><i class="fa fa-check-circle"></i></span>';
+          typeColor = 'text-green-300';
+          break;
+        case 'error':
+          typeIcon = '<span class="text-red-400 mr-1"><i class="fa fa-exclamation-circle"></i></span>';
+          typeColor = 'text-red-300';
+          break;
+        case 'warning':
+          typeIcon = '<span class="text-yellow-400 mr-1"><i class="fa fa-exclamation-triangle"></i></span>';
+          typeColor = 'text-yellow-300';
+          break;
+        case 'info':
+        default:
+          typeIcon = '<span class="text-blue-400 mr-1"><i class="fa fa-info-circle"></i></span>';
+          typeColor = 'text-gray-300';
+      }
+
+      logLine.innerHTML = `<span class="text-gray-500 mr-2">[${timestamp}]</span>${typeIcon}<span class="${typeColor}">${message}</span>`;
+      logWindow.appendChild(logLine);
+      logWindow.scrollTop = logWindow.scrollHeight;
+    }
+
+    // 替换console.log
+    const originalLog = console.log;
+    console.log = function (...args) {
+      originalLog(...args);
+      log(args.join(" "));
+    };
+
+    // 清空日志
+    clearLogBtn.addEventListener('click', () => {
+      logWindow.innerHTML = '<div class="text-gray-400 log-entry">Đã xóa nhật ký.</div>';
+    });
+
+    // 核心功能代码
+    var connected = false;
+    var device = null;
+    var longValue = null;
+    var deviceTimeInterval = null; // 设备时间更新定时器
+    var deviceTimeBase = null;     // 设备时间基准值
+
+    // 格式化时间显示
+    function formatTime(year, month, mday, hour, min, sec) {
+      month += 1;
+      return `${year}-${month.toString().padStart(2, '0')}-${mday.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
+    // 更新设备时间显示
+    function updateDeviceTime() {
+      if (!deviceTimeBase) return;
+
+      // 获取基准时间
+      let { year, month, mday, hour, minute, second } = deviceTimeBase;
+
+      // 计算从基准时间开始经过的秒数
+      const now = new Date();
+      const elapsedSeconds = Math.floor((now - deviceTimeBase.timestamp) / 1000);
+
+      // 更新时间
+      let totalSeconds = second + elapsedSeconds;
+      second = totalSeconds % 60;
+      let totalMinutes = minute + Math.floor(totalSeconds / 60);
+      minute = totalMinutes % 60;
+      let totalHours = hour + Math.floor(totalMinutes / 60);
+      hour = totalHours % 24;
+      // 此处忽略天数变化，因为设备时间通常不会长时间运行
+
+      // 更新显示
+      document.getElementById('current_time').textContent = formatTime(year, month, mday, hour, minute, second);
+    }
+
+    function onClick() {
+      if(connected) disconnect();
+      else connectToDevice();
+    }
+
+    // 连接设备
+    async function connectToDevice() {
+      try {
+        // 更新按钮状态
+        const connectButton = document.getElementById('connect-button');
+        connectButton.disabled = true;
+        connectButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang kết nối...';
+
+        console.log('Đang yêu cầu kết nối thiết bị...');
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "DLG-CLOCK" }],
+          optionalServices: [ 0xff00 ]
+        });
+        console.log('Tên thiết bị:', device.name);
+        document.getElementById('device_name').textContent = device.name;
+        device.ongattserverdisconnected = onDisconnect;
+
+        let server = await device.gatt.connect();
+        console.log('Đã kết nối thiết bị');
+
+        let service = await server.getPrimaryService(0xff00);
+        let ctrlPoint = await service.getCharacteristic(0xff03);
+        let adc1Value = await service.getCharacteristic(0xff02);
+        longValue = await service.getCharacteristic(0xff01);
+
+        let cur_voltage = await adc1Value.readValue();
+        console.log('Điện áp hiện tại:', cur_voltage.getUint16(0, true) / 1000 + 'V');
+        document.getElementById('current_voltage').textContent = (cur_voltage.getUint16(0, true) / 1000).toFixed(2) + ' V';
+
+        let cur_time = await longValue.readValue();
+        let year = cur_time.getUint16(0, true),
+            month = cur_time.getUint8(2),
+            mday = cur_time.getUint8(3),
+            hour = cur_time.getUint8(4),
+            minute = cur_time.getUint8(5),
+            second = cur_time.getUint8(6);
+
+        // 保存设备时间基准值和当前时间戳
+        deviceTimeBase = {
+          year, month, mday, hour, minute, second,
+          timestamp: new Date()
+        };
+
+        // 立即更新设备时间显示
+        updateDeviceTime();
+
+        // 设置定时器每秒更新一次设备时间
+        if (deviceTimeInterval) clearInterval(deviceTimeInterval);
+        deviceTimeInterval = setInterval(updateDeviceTime, 1000);
+
+        let now = new Date();
+        document.getElementById('system_time').textContent = formatTime(
+          now.getFullYear(), now.getMonth(), now.getDate(),
+          now.getHours(), now.getMinutes(), now.getSeconds()
+        );
+
+        connected = true;
+        document.getElementById('setime-button').disabled = false;
+        document.getElementById('upfirm-button').disabled = false;
+        document.getElementById('send90-button').disabled = false;
+        document.getElementById('calibration-button').disabled = false;
+        document.getElementById('setime-button').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('upfirm-button').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('send90-button').classList.remove('opacity-50', 'cursor-not-allowed');
+        document.getElementById('calibration-button').classList.remove('opacity-50', 'cursor-not-allowed');
+
+        connectButton.innerHTML = '<i class="fa fa-disconnect"></i> Ngắt kết nối';
+        connectButton.disabled = false;
+      } catch (error) {
+        console.log('Kết nối thất bại:', error);
+        disconnect();
+      }
+    }
+
+    // 对时功能
+    async function onSetTime() {
+      const setimeButton = document.getElementById('setime-button');
+      setimeButton.disabled = true;
+      setimeButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 同步中...';
+
+      try {
+        // 等待整秒时间
+        while(true){
+          const tm_ms = Date.now();
+          if((tm_ms%1000)==0)
+            break;
+		}
+
+        let now = new Date();
+        let year = now.getFullYear(),
+            month = now.getMonth(),
+            mday = now.getDate(),
+            wday = now.getDay(),
+            hour = now.getHours(),
+            minute = now.getMinutes(),
+            second = now.getSeconds();
+
+        let locale_str = now.toLocaleDateString('zh-CN-u-ca-chinese',{month:'numeric',day:'numeric'});
+        let l_month = locale_str.startsWith('闰') ? 128 : 0;
+        if (l_month) locale_str = locale_str.slice(1);
+        let [l_month_num, l_day] = locale_str.split('-').map(Number);
+        l_month += l_month_num;
+        let l_year = parseInt(now.toLocaleDateString('zh-CN-u-ca-chinese',{year:'numeric'}));
+        console.log('Năm Âm lịch:', l_year, 'Tháng:', l_month, 'Ngày:', l_day);
+
+        let buf = new Uint8Array(12);
+        buf.set([0x91, year % 256, Math.floor(year / 256), month, mday, hour, minute, second, wday, l_year - 2020, l_month - 1, l_day]);
+        await longValue.writeValue(buf);
+
+        // 更新设备时间基准值
+        deviceTimeBase = {
+          year, month: month, mday, hour, minute, second,
+          timestamp: new Date()
+        };
+
+        // 立即更新设备时间显示
+        updateDeviceTime();
+
+        console.log('Đã đồng bộ hóa thời gian thành công!');
+      } catch (error) {
+        console.log('Đồng bộ hóa thời gian thất bại:', error);
+      } finally {
+        setimeButton.innerHTML = '<i class="fa fa-clock-o"></i> Đồng bộ thời gian';
+        setimeButton.disabled = false;
+      }
+    }
+
+    // 文件读取辅助函数
+    function readFileAsArrayBuffer(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    // 固件标识查找
+    function find_patten(target, patten) {
+      for (let i = 0; i <= target.length - patten.length; i++) {
+        let match = true;
+        for (let j = 0; j < patten.length; j++) {
+          if (target[i + j] !== patten[j]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) return i;
+      }
+      return -1;
+    }
+
+    // 发送命令
+    async function onSend90() {
+      const send90Button = document.getElementById('send90-button');
+      send90Button.disabled = true;
+      send90Button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang gửi...';
+
+      try {
+        let buf = new Uint8Array([0x90]);  // 构造单字节命令
+        await longValue.writeValue(buf);
+        console.log('Đã gửi lệnh chuyển đổi.');
+      } catch (err) {
+        console.log('Gửi thất bại:', err);
+      } finally {
+        send90Button.innerHTML = '<i class="fa fa-send"></i> Chuyển đổi chế độ';
+        send90Button.disabled = false;
+      }
+    }
+
+    // 固件升级
+    async function onUpdate() {
+      const upfirmButton = document.getElementById('upfirm-button');
+      upfirmButton.disabled = true;
+      upfirmButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang cập nhật...';
+
+      document.getElementById('progress-container').classList.remove('hidden');
+
+      let firm_buf, firm_size;
+
+      try {
+        console.log('Hãy chọn tập tin firmware');
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'Firm files', accept: { 'text/plain': ['.bin'] } }]
+        });
+        const file = await handle.getFile();
+        let abuf = await readFileAsArrayBuffer(file);
+        firm_buf = new Uint8Array(abuf);
+        firm_size = file.size;
+      } catch (err) {
+        console.log('Không thể đọc tập tin:', err);
+        upfirmButton.innerHTML = '<i class="fa fa-refresh"></i> Cập nhật firmware';
+        upfirmButton.disabled = false;
+        // document.getElementById('progress-container').classList.add('hidden');
+        return;
+      }
+
+      let firm_magic = new Uint8Array([0x79, 0x13, 0xa5, 0xf9, 0x86, 0xec, 0x5a, 0x06]);
+      let pos = find_patten(firm_buf, firm_magic);
+      if (pos == -1) {
+        console.log('Firmware không hợp lệ: Không tìm thấy số phiên bản!');
+        upfirmButton.innerHTML = '<i class="fa fa-refresh"></i> Cập nhật firmware';
+        upfirmButton.disabled = false;
+        // document.getElementById('progress-container').classList.add('hidden');
+        return;
+      }
+
+      let firm_ver = firm_buf[pos + 9] * 256 + firm_buf[pos + 8];
+      let firm_crc = CRC32.buf(firm_buf);
+      console.log('Phiên bản firmware:', firm_ver, 'kích cỡ:', firm_size, 'CRC:', (firm_crc >>> 0).toString(16));
+
+      let buf = new Uint8Array(136);
+      let view = new DataView(buf.buffer);
+      buf[0] = 0xa0;
+      view.setUint16(2, firm_size, true);
+      await longValue.writeValue(buf);
+
+      let sent = 0;
+      const totalSize = firm_size + 64;
+      const progressBar = document.getElementById('update_progress_bar');
+      const progressText = document.getElementById('update_progress_text');
+
+      try {
+        for (let i = 0; i < totalSize; i += 256) {
+          buf.fill(0xff);
+          if (i === 0) {
+            view.setUint32(8, 0x00aa5170, true);
+            view.setUint32(12, firm_size, true);
+            view.setUint32(16, firm_crc, true);
+            view.setUint32(36, 0xa50f0000 + firm_ver, true);
+            buf[40] = 0;
+            buf[0] = 0xa2;
+            buf.set(firm_buf.slice(sent, sent + 64), 72);
+            await longValue.writeValue(buf);
+            sent += 64;
+          } else {
+            buf[0] = 0xa2;
+            buf.set(firm_buf.slice(sent, sent + 128), 8);
+            await longValue.writeValue(buf);
+            sent += 128;
+          }
+          buf[0] = 0xa3;
+          buf.set(firm_buf.slice(sent, sent + 128), 8);
+          await longValue.writeValue(buf);
+          sent += 128;
+
+          // 更新进度条
+          const progress = Math.min(Math.round(100 * sent / totalSize), 100);
+          progressBar.style.width = `${progress}%`;
+          progressText.textContent = `${progress}%`;
+          document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
+        }
+
+        buf[0] = 0xa4;
+        buf.fill(0, 1, 4);
+        await longValue.writeValue(buf);
+        console.log('Hoàn thành nâng cấp!');
+      } catch (error) {
+        console.log('Hoàn tất nâng cấp; đã ngắt kết nối Bluetooth.');
+      } finally {
+        upfirmButton.innerHTML = '<i class="fa fa-refresh"></i> Cập nhật firmware';
+        upfirmButton.disabled = false;
+        // document.getElementById('progress-container').classList.add('hidden');
+      }
+    }
+
+	async function onCalibration() {
+		document.getElementById('calibration-button').disabled = true;
+
+		var minute, second, last_minute, cal_minute;
+
+		cur_time = await longValue.readValue();
+		last_minute = cur_time.getUint8(5);
+		cal_minute = cur_time.getInt32(7, true);
+		console.log('Sau khi đồng bộ hóa thời gian: '+cal_minute+' phút');
+
+        console.log('Chờ cho tới khi chuyển sang phút tiếp theo......');
+        while(true) {
+          cur_time = await longValue.readValue();
+          minute = cur_time.getUint8(5);
+            if(minute != last_minute)
+              break;
+                last_minute = minute;
+        }
+        second = cur_time.getUint8(6);
+
+        var today = new Date();
+        var sys_minute = today.getMinutes();
+        var sys_second = today.getSeconds();
+        console.log('Thời gian thiết bị: '+minute+' phút '+second+' giây');
+        console.log('Thời gian hệ thống: '+sys_minute+' phút '+sys_second+' giây');
+
+		if(cal_minute==-1){
+			console.log('Vui lòng đồng bộ thời gian của bạn trước.!');
+		}else if(cal_minute<2880){
+			console.log('Khoảng thời gian đồng bộ hóa và hiệu chuẩn quá ngắn (dưới hai ngày)!');
+		}else{
+
+			if(minute>sys_minute){
+				if(minute-sys_minute>50)
+					sys_minute += 60;
+			}else{
+				if(sys_minute-minute>50)
+					minute += 60;
+			}
+
+			var diff = (minute*60+second)-(sys_minute*60+sys_second);
+			console.log('Chênh lệch thời gian: '+diff+' giây');
+
+			var buf = new Uint8Array(4);
+			buf[0] = 0x92;
+			buf[1] = diff%256;
+			buf[2] = diff/256;
+			buf[3] = 0x00;
+			await longValue.writeValue(buf);
+
+			console.log('Quá trình hiệu chuẩn hoàn tất.');
+		}
+		document.getElementById('calibration-button').disabled = false;
+	}
+
+    // 断开连接
+    function disconnect() {
+      const connectButton = document.getElementById('connect-button');
+      connectButton.disabled = true;
+      connectButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Ngắt kết nối...';
+
+      document.getElementById('setime-button').disabled = true;
+      document.getElementById('send90-button').disabled = true;
+      document.getElementById('upfirm-button').disabled = true;
+      document.getElementById('calibration-button').disabled = true;
+      document.getElementById('setime-button').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('upfirm-button').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('send90-button').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('calibration-button').classList.add('opacity-50', 'cursor-not-allowed');
+
+      // 清除设备时间更新定时器
+      if (deviceTimeInterval) {
+        clearInterval(deviceTimeInterval);
+        deviceTimeInterval = null;
+      }
+      deviceTimeBase = null;
+
+      if (device && device.gatt.connected) {
+        device.gatt.disconnect();
+      }
+      onDisconnect();
+    }
+
+    // 断开回调
+    function onDisconnect() {
+      device = null;
+      connected = false;
+
+      document.getElementById('device_name').textContent = "Chưa kết nối";
+      document.getElementById('current_voltage').textContent = "--.- V";
+      document.getElementById('current_time').textContent = "--:--:--";
+
+      const connectButton = document.getElementById('connect-button');
+      connectButton.innerHTML = '<i class="fa fa-bluetooth"></i> Kết nối thiết bị';
+      connectButton.disabled = false;
+
+      console.log('Thiết bị đã bị ngắt kết nối.');
+    }
+
+    // 事件绑定
+    document.getElementById('connect-button').addEventListener('click', onClick);
+    document.getElementById('setime-button').addEventListener('click', onSetTime);
+    // document.getElementById('upfirm-button').addEventListener('click', onUpdate);
+    document.getElementById('send90-button').addEventListener('click', onSend90);
+    document.getElementById('calibration-button').addEventListener('click', onCalibration);
+
+    function switchTab(tabId) {
+      // Ẩn tất cả nội dung tab
+      document.querySelectorAll('.tab-content').forEach(content => {
+          content.classList.add('hidden');
+      });
+
+      // Reset style tất cả các nút tab về trạng thái không active (màu xám)
+      ['tab1-btn', 'tab2-btn', 'tab3-btn'].forEach(btnId => {
+          const btn = document.getElementById(btnId);
+          btn.className = "flex-1 min-w-[150px] justify-center bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-300 transition-all";
+      });
+
+      // Hiện nội dung tab được chọn
+      document.getElementById(tabId + '-content').classList.remove('hidden');
+
+      // Làm nổi bật nút được click (dùng màu primary hoặc accent)
+      const activeBtn = document.getElementById(tabId + '-btn');
+      activeBtn.className = "flex-1 min-w-[150px] justify-center bg-amber-500 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-md transition-all";
+  }
+
+    // Hàm cập nhật kích thước canvas dựa trên dropdown ở Tab 2
+    function updateCanvasSize() {
+        const sizeSelect = document.getElementById('screen-size-select');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext("2d");
+
+        let width = 212;
+        let height = 104;
+
+        if (sizeSelect.value === "250x144") {
+            width = 250;
+            height = 144;
+        } else {
+            width = 212;
+            height = 104;
+        }
+
+        // Gán kích thước cho canvas
+        canvas.width = width;
+        canvas.height = height;
+
+        // Tô nền trắng mặc định
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+
+        if (typeof addLog === 'function') {
+            addLog(`Canvas size updated to: ${width}x${height}`);
+        }
+    }
+
+    function canvas2bytes_bw(canvas, type='bw', rotation = 270) {
+
+        // 1. Tạo canvas tạm để xử lý xoay góc mà không làm ảnh hưởng canvas gốc
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        const arr = [];
+        let buffer = [];
+        let w = canvas.width;
+        let h = canvas.height;
+
+        // Đổi chiều rộng/cao nếu xoay 90 hoặc 270 độ
+        if (rotation === 90 || rotation === 270) {
+            tempCanvas.width = h;
+            tempCanvas.height = w;
+        } else {
+            tempCanvas.width = w;
+            tempCanvas.height = h;
+        }
+
+        tempCtx.save();
+        if (rotation === 90) {
+            tempCtx.translate(h, 0);
+            tempCtx.rotate(Math.PI / 2);
+        } else if (rotation === 180) {
+            tempCtx.translate(w, h);
+            tempCtx.rotate(Math.PI);
+        } else if (rotation === 270) {
+            tempCtx.translate(0, w);
+            tempCtx.rotate(-Math.PI / 2);
+        }
+        tempCtx.drawImage(canvas, 0, 0);
+        tempCtx.restore();
+
+        // 2. Lấy dữ liệu điểm ảnh chuẩn theo kích thước thực sau khi xoay
+        const targetWidth = tempCanvas.width;
+        const targetHeight = tempCanvas.height;
+        const imageData = tempCtx.getImageData(0, 0, targetWidth, targetHeight);
+
+        // 3. Quét theo HÀNG NGANG: y (trên -> dưới), x (trái -> phải)
+        for (let y = 0; y < targetHeight; y++) {
+            for (let x = 0; x < targetWidth; x++) {
+                const index = (y * targetWidth + x) * 4;
+
+                if (type !== 'bwr') {
+                    // Điểm sáng/trắng = 1, điểm tối/đen = 0
+                    buffer.push(imageData.data[index] > 0 && imageData.data[index + 1] > 0 && imageData.data[index + 2] > 0 ? 1 : 0);
+                } else {
+                    // Điểm đỏ = 1, các màu khác = 0
+                    buffer.push(imageData.data[index] > 0 && imageData.data[index + 1] === 0 && imageData.data[index + 2] === 0 ? 1 : 0);
+                }
+
+                // Cứ đủ 8 pixel (1 byte) thì đóng gói vào mảng
+                if (buffer.length === 8) {
+                    arr.push(parseInt(buffer.join(''), 2));
+                    buffer = [];
+                }
+            }
+            // 4. Xử lý phần padding bit dư ở cuối mỗi hàng (nếu chiều rộng không chia hết cho 8)
+            if (buffer.length > 0) {
+                // Dùng .padEnd() để đệm thêm số '0' vào bên phải cho đủ 8 bit (1 byte)
+                let paddedStr = buffer.join('').padEnd(8, '0');
+                arr.push(parseInt(paddedStr, 2));
+            }
+        }
+        // printCArrayToConsole(arr);
+        return arr;
+    }
+
+    function printCArrayToConsole(byteArray, variableName = "image_data") {
+        const hexString = byteArray.map(b => '0x' + b.toString(16).padStart(2, '0').toUpperCase()).join(', ');
+
+        console.log(`const unsigned char ${variableName}[${byteArray.length}] = {`);
+        console.log(hexString);
+        console.log(`};`);
+    }
+
+    async function sendBufferData(value, type) {
+        addLog(`Starting image send mode:${type}, size ${value.length}byte`);
+        let code = 'ff';
+        if (type === 'bwr') {
+            code = '00';
+        }
+        let cod = '03';
+        if (value.length == 7000 || value.length == 18000) { cod = '04'; }
+        const step = my_step;
+        let partIndex = 0;
+        for (let i = 0; i < value.length; i += step) {
+            addLog(`Sending block ${partIndex + 1} block. Block size: ${step / 2 + 4}byte. Start position: ${i / 2}`);
+            await sendCommand(hexToBytes(cod + code + intToHex(i / 2, 2) + value.substring(i, i + step)));
+            partIndex += 1;
+        }
+    }
+
+    async function upload_image() {
+        const uploadBtn = document.getElementById('upload-btn'); // Nút "Tải xuống thiết bị" ở Tab 2
+        if (uploadBtn) {
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải ảnh lên...';
+        }
+
+        try {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) throw new Error('Không tìm thấy thẻ canvas!');
+
+            // 1. Lấy mảng byte từ canvas (ví dụ: dùng hàm canvas2bytes_bw đã viết ở trên, xoay 0 độ)
+            // Nếu bạn muốn dùng chế độ màu khác (như bwr), có thể truyền thêm tham số.
+            const imageBytes = canvas2bytes_bw(canvas);
+            const totalSize = imageBytes.length;
+
+            console.log(`Bắt đầu gửi ảnh: ${canvas.width}x${canvas.height}, tổng số byte: ${totalSize}`);
+
+            // 2. Gói tin bắt tay ban đầu (Mã lệnh: 0xb0)
+            let buf = new Uint8Array(136);
+            let view = new DataView(buf.buffer);
+            buf.fill(0xff); // Điền giá trị trống mặc định
+            buf[0] = 0x80;  // Mã lệnh bắt tay truyền ảnh
+            view.setUint32(2, totalSize, true); // Gửi tổng kích thước dữ liệu ảnh
+
+            // Gửi qua Bluetooth (giả định longValue là characteristic Bluetooth đã kết nối)
+            await longValue.writeValue(buf);
+
+            let sent = 0;
+
+            // Lấy các thành phần hiển thị tiến trình (nếu có trên giao diện Tab 2)
+            const progressBar = document.getElementById('img_update_progress_bar');
+            const progressText = document.getElementById('img_update_progress_text');
+
+            // 3. Vòng lặp chia nhỏ dữ liệu thành các block (mỗi block 128 bytes) để gửi
+            for (let i = 0; i < totalSize; i += 128) {
+                buf.fill(0xff);
+                buf[0] = 0x81; // Mã lệnh truyền dữ liệu ảnh liên tục
+                // Ghi biến 'sent' vào 2 byte (buf[1] và buf[2]) theo chuẩn Little-Endian
+                view.setUint16(1, sent, false);
+
+                // Cắt 128 bytes từ mảng byte hình ảnh dán vào buffer (bắt đầu từ vị trí index 8)
+                const chunk = imageBytes.slice(sent, sent + 128);
+                buf.set(chunk, 8);
+                if ((sent + chunk.length) < totalSize){
+                  buf[3] = chunk.length;
+                } else {
+                  buf[3] = totalSize - sent;
+                }
+                await longValue.writeValue(buf);
+                sent += chunk.length;
+
+                // Cập nhật thanh tiến trình (nếu giao diện của bạn có hỗ trợ)
+                const progress = Math.min(Math.round(100 * sent / totalSize), 100);
+                if (progressBar) progressBar.style.width = `${progress}%`;
+                if (progressText) progressText.textContent = `${progress}%`;
+                // console.log(`Đã gửi ${sent}/${totalSize} bytes`);
+                // printCArrayToConsole(buf, 'buf');
+                // `Sending block ${partIndex + 1} block. Block size: ${step / 2 + 4}byte. Start position: ${i /
+            }
+
+            // 4. Gói tin kết thúc quá trình truyền ảnh (Mã lệnh: 0xb4)
+            buf.fill(0);
+            buf[0] = 0x82; // Mã lệnh báo kết thúc, yêu cầu refresh màn hình e-Paper
+            await longValue.writeValue(buf);
+
+            console.log('Tải ảnh xuống thiết bị thành công!');
+            if (typeof addLog === 'function') {
+                addLog('Truyền hình ảnh hoàn tất!');
+            }
+
+        } catch (error) {
+            console.log('Lỗi khi truyền ảnh:', error);
+            if (typeof addLog === 'function') {
+                addLog('Lỗi truyền ảnh: ' + error.message);
+            }
+        } finally {
+            // Khôi phục lại trạng thái nút bấm
+            if (uploadBtn) {
+                uploadBtn.innerHTML = '<i class="fa fa-cloud-upload"></i> Tải xuống thiết bị';
+                uploadBtn.disabled = false;
+            }
+        }
+    }
+
+    // Biến lưu trữ ảnh gốc (để khi kéo slider liên tục không bị mất chất lượng ảnh ban đầu)
+    let originalImageObj = null;
+
+    // đọc ảnh gốc từ file
+    document.getElementById('image-file-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                originalImageObj = img; // Lưu lại đối tượng ảnh gốc
+                applyThreshold();      // Vẽ ảnh lên canvas và áp dụng ngưỡng
+                if (typeof addLog === 'function') addLog('Đã tải ảnh lên preview thành công.');
+            }
+            img.src = event.target.result;
+        }
+        reader.readAsDataURL(file);
+    });
+
+    // Hàm xử lý lọc ngưỡng đen trắng
+    function applyThreshold() {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('threshold-slider');
+        const valSpan = document.getElementById('threshold-value');
+
+        const threshold = parseInt(slider.value);
+        if (valSpan) valSpan.textContent = threshold;
+
+        if (!originalImageObj) return;
+
+        const cWidth = canvas.width;
+        const cHeight = canvas.height;
+
+        // 1. Xóa trắng canvas tạm thời
+        ctx.clearRect(0, 0, cWidth, cHeight);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, cWidth, cHeight);
+
+        // 2. Lưu trạng thái Context để thực hiện xoay hệ tọa độ
+        ctx.save();
+        ctx.translate(cWidth / 2, cHeight / 2);
+        ctx.rotate((currentRotation * Math.PI) / 180);
+
+        // Tính toán kích thước sau khi xoay cho phù hợp khung vẽ
+        let drawW = cWidth;
+        let drawH = cHeight;
+        if (currentRotation === 90 || currentRotation === 270) {
+            drawW = cHeight;
+            drawH = cWidth;
+        }
+
+        // Xử lý các chế độ căn chỉnh ảnh (fit mode)
+        let imgW = originalImageObj.width;
+        let imgH = originalImageObj.height;
+        let dX = -drawW / 2;
+        let dY = -drawH / 2;
+        let dW = drawW;
+        let dH = drawH;
+
+        if (imageFitMode === 'contain') {
+            let hRatio = drawW / imgW;
+            let vRatio = drawH / imgH;
+            let ratio = Math.min(hRatio, vRatio);
+            dW = imgW * ratio;
+            dH = imgH * ratio;
+            dX = -dW / 2;
+            dY = -dH / 2;
+        } else if (imageFitMode === '100') {
+            dW = imgW;
+            dH = imgH;
+            dX = -imgW / 2;
+            dY = -imgH / 2;
+        }
+
+        // Vẽ ảnh lên canvas theo chế độ đã chọn
+        ctx.drawImage(originalImageObj, dX, dY, dW, dH);
+        ctx.restore();
+
+        // 3. Quét pixel và lọc ngưỡng đen trắng (Thresholding)
+        const imgData = ctx.getImageData(0, 0, cWidth, cHeight);
+        const data = imgData.data;
+
+        for (let i = 0; i < data.length; i += 4) {
+            let gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            let v = gray >= threshold ? 255 : 0;
+
+            data[i]     = v;
+            data[i + 1] = v;
+            data[i + 2] = v;
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    let currentRotation = 0; // Góc xoay hiện tại (0, 90, 180, 270...)
+    let imageFitMode = 'stretch'; // 'stretch' (kéo giãn), 'contain' (vừa khít), '100' (giữ nguyên gốc)
+
+    // 1. Tải lại ảnh gốc từ input file
+    function reloadImage() {
+        const fileInput = document.getElementById('image-file-input');
+        if (fileInput.files && fileInput.files[0]) {
+            // Kích hoạt lại sự kiện change để load lại từ đầu
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        } else {
+            if (typeof addLog === 'function') addLog('Chưa có file ảnh nào được chọn trước đó!');
+        }
+    }
+
+    // 2. Kéo giãn vừa màn hình (mặc định stretch lấp đầy canvas)
+    function fitImageStretch() {
+        imageFitMode = 'stretch';
+        applyThreshold();
+    }
+
+    // 3. Vừa khít màn hình (giữ tỷ lệ ảnh, căn giữa, không bị méo)
+    function fitImageContain() {
+        imageFitMode = 'contain';
+        applyThreshold();
+    }
+
+    // 4. Đặt lại tỷ lệ 100% (vẽ kích thước gốc của ảnh vào giữa canvas)
+    function resetImageScale() {
+        imageFitMode = '100';
+        applyThreshold();
+    }
+
+    // 5. Xoay góc (cộng dồn góc xoay)
+    function rotateImage(angle) {
+        currentRotation = (currentRotation + angle) % 360;
+        if (currentRotation < 0) currentRotation += 360;
+        applyThreshold();
+    }
+
+    // 6. Đặt lại góc xoay về 0
+    function resetImageRotation() {
+        currentRotation = 0;
+        applyThreshold();
+    }
+
+    // Chạy khởi tạo kích thước canvas lần đầu khi load trang
+    window.addEventListener('DOMContentLoaded', () => {
+        updateCanvasSize();
+    });
+
+    async function onUpdateFont() {
+        const upfontBtn = document.getElementById('upfont-button');
+        const upfirmBtn = document.getElementById('upfirm-button');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('update_progress_bar');
+        const progressText = document.getElementById('update_progress_text');
+        const statusLabel = document.getElementById('update_status_label');
+
+        let font_buf, font_size;
+
+        // 1. Mở cửa sổ chọn file nhị phân (.bin)
+        try {
+            if (typeof addLog === 'function') addLog('Vui lòng chọn tập tin Font Data (.bin)...');
+
+            const [handle] = await window.showOpenFilePicker({
+                types: [{ description: 'Font Binary Files', accept: { 'application/octet-stream': ['.bin'] } }]
+            });
+            const file = await handle.getFile();
+            let abuf = await readFileAsArrayBuffer(file);
+            font_buf = new Uint8Array(abuf);
+            font_size = file.size;
+        } catch (err) {
+            if (typeof addLog === 'function') addLog('Hủy chọn file font hoặc lỗi đọc file.');
+            return;
+        }
+
+        // 2. Khóa nút và bật giao diện tiến trình
+        upfontBtn.disabled = true;
+        if (upfirmBtn) upfirmBtn.disabled = true;
+        upfontBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang ghi font...';
+
+        if (progressContainer) progressContainer.classList.remove('hidden');
+        if (statusLabel) statusLabel.textContent = 'Đang ghi Font Data...';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressText) progressText.textContent = '0%';
+
+        try {
+            // 3. Gói tin bắt tay khởi tạo Font Data (Mã lệnh: 0xc0)
+            let buf = new Uint8Array(136);
+            let view = new DataView(buf.buffer);
+            buf.fill(0xff);
+            buf[0] = 0x60;                      // Mã lệnh thông báo nạp font
+            view.setUint32(2, font_size, true);  // Kích thước tổng của file font (4 bytes)
+            await longValue.writeValue(buf);
+
+            let sent = 0;
+
+            // 4. Vòng lặp truyền dữ liệu font theo từng khối (mỗi lần gửi 128 bytes)
+            for (let i = 0; i < font_size; i += 128) {
+                buf.fill(0xff);
+                buf[0] = 0x61;                  // Mã lệnh truyền data font
+                view.setUint16(1, sent, false);
+
+                // Cắt 128 bytes chèn vào buffer từ vị trí byte thứ 8
+                const chunk = font_buf.slice(sent, sent + 128);
+                buf.set(chunk, 8);
+                if ((sent + chunk.length) < font_size){
+                  buf[3] = chunk.length;
+                } else {
+                  buf[3] = font_size - sent;
+                }
+
+                await longValue.writeValue(buf);
+                sent += chunk.length;
+
+                // Cập nhật thanh tiến trình
+                const progress = Math.min(Math.round(100 * sent / font_size), 100);
+                if (progressBar) progressBar.style.width = `${progress}%`;
+                if (progressText) progressText.textContent = `${progress}%`;
+                console.log(`Đã gửi ${sent}/${font_size} bytes`);
+                printCArrayToConsole(buf, 'font_buff');
+            }
+
+            // 5. Gói tin kết thúc quá trình ghi font (Mã lệnh: 0xc4)
+            buf.fill(0);
+            buf[0] = 0x62;
+            await longValue.writeValue(buf);
+
+            if (typeof addLog === 'function') addLog(`Nạp Font Data thành công! (${font_size} bytes)`);
+
+        } catch (error) {
+            console.error('Lỗi khi nạp font data:', error);
+            if (typeof addLog === 'function') addLog('Lỗi nạp font: ' + error.message);
+        } finally {
+            // 6. Khôi phục lại trạng thái giao diện
+            upfontBtn.innerHTML = '<i class="fa fa-font"></i> Ghi Font Data';
+            upfontBtn.disabled = false;
+            if (upfirmBtn) upfirmBtn.disabled = false;
+
+            setTimeout(() => {
+                if (progressContainer) progressContainer.classList.add('hidden');
+            }, 2000);
+        }
+    }
+
+  </script>
+</body>
+</html>
