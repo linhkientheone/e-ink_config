@@ -709,13 +709,22 @@
       try {
         // 更新按钮状态
         const connectButton = document.getElementById('connect-button');
-        connectButton.disabled = true;
+        // connectButton.disabled = true;
         connectButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang kết nối...';
 
         console.log('Đang yêu cầu kết nối thiết bị...');
+
+
+        // 2. Chuyển UUID 16-bit sang dạng chuỗi chuẩn 128-bit Base UUID của Bluetooth SIG
+        // 0xff00 -> 0000ff00-0000-1000-8000-00805f9b34fb
+        const SVC_UUID   = '0000ff00-0000-1000-8000-00805f9b34fb';
+        const CHAR_CTRL  = '0000ff03-0000-1000-8000-00805f9b34fb';
+        const CHAR_ADC   = '0000ff02-0000-1000-8000-00805f9b34fb';
+        const CHAR_LONG  = '0000ff01-0000-1000-8000-00805f9b34fb';
+
         device = await navigator.bluetooth.requestDevice({
           filters: [{ namePrefix: "ONE-" }],
-          optionalServices: [ 0xff00 ]
+          optionalServices: [ SVC_UUID ]
         });
         console.log('Tên thiết bị:', device.name);
         document.getElementById('device_name').textContent = device.name;
@@ -724,10 +733,10 @@
         let server = await device.gatt.connect();
         console.log('Đã kết nối thiết bị');
 
-        let service = await server.getPrimaryService(0xff00);
-        let ctrlPoint = await service.getCharacteristic(0xff03);
-        let adc1Value = await service.getCharacteristic(0xff02);
-        longValue = await service.getCharacteristic(0xff01);
+        let service = await server.getPrimaryService(SVC_UUID);
+        let ctrlPoint = await service.getCharacteristic(CHAR_CTRL);
+        let adc1Value = await service.getCharacteristic(CHAR_ADC);
+        longValue = await service.getCharacteristic(CHAR_LONG);
 
         let cur_voltage = await adc1Value.readValue();
         console.log('Điện áp hiện tại:', cur_voltage.getUint16(0, true) / 1000 + 'V');
