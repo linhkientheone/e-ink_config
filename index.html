@@ -216,7 +216,7 @@
             <label for="screen-size-select" class="text-sm font-semibold text-gray-700">Chọn loại màn hình E-Ink:</label>
             <select id="screen-size-select" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white text-gray-800" onchange="updateCanvasSize()">
               <option value="212x104">2.13 inch (212 x 104 pixels)</option>
-              <option value="250x144">2.13 inch (250 x 144 pixels)</option>
+              <option value="250x122">2.13 inch (250 x 122 pixels)</option>
             </select>
           </div>
 
@@ -936,9 +936,12 @@
         return;
       }
 
+      let major = firm_buf[pos + 9];
+      let minor = firm_buf[pos + 8];
       let firm_ver = firm_buf[pos + 9] * 256 + firm_buf[pos + 8];
       let firm_crc = CRC32.buf(firm_buf);
-      console.log('Phiên bản firmware:', firm_ver, 'kích cỡ:', firm_size, 'CRC:', (firm_crc >>> 0).toString(16));
+
+      console.log(`firmware version ${major}.${minor} - kích cỡ: ${firm_size} - CRC: ${(firm_crc >>> 0).toString(16)}`);
 
       let buf = new Uint8Array(136);
       let view = new DataView(buf.buffer);
@@ -1139,9 +1142,9 @@
         let width = 212;
         let height = 104;
 
-        if (sizeSelect.value === "250x144") {
+        if (sizeSelect.value === "250x122") {
             width = 250;
-            height = 144;
+            height = 122;
         } else {
             width = 212;
             height = 104;
