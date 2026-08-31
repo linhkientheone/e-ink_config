@@ -86,7 +86,7 @@
     </header>
 
     <!-- Trạng thái thiết bị và hệ thống -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
           <i class="fa fa-microchip"></i>
@@ -94,6 +94,16 @@
         <div>
           <p class="text-gray-500 text-sm">Tên thiết bị</p>
           <p id="device_name" class="font-semibold">Chưa có kết nối</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <i class="fa fa-code"></i>
+      </div>
+        <div>
+          <p class="text-gray-500 text-sm">Phiên bản Firmware</p>
+          <p id="device_fw_version" class="font-semibold">--.--</p>
         </div>
       </div>
 
@@ -193,7 +203,7 @@
               <i class="fa fa-send"></i>
               <span class="flex flex-col text-center leading-tight">
                 <span>Chuyển đổi</span>
-                <span>chế độ</span>
+                <span>giao diện</span>
               </span>
             </button>
             <button id="calibration-button" class="bg-purple-500 text-white px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium opacity-50 cursor-not-allowed shadow-sm transition-all" disabled>
@@ -547,15 +557,30 @@
                   </div>
                   <div class="w-full text-center">
                       <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 14</h4>
-                      <p class="text-xs text-gray-500 mb-3">Hiển thị hình ảnh</p>
+                      <p class="text-xs text-gray-500 mb-3">Hiển thị hình ảnh đã lưu trong bộ nhớ thiết bị</p>
                       <button onclick="selectWatchFace(13)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
                       Áp dụng mẫu này
                       </button>
                   </div>
                   </div>
 
+                <!-- Mẫu 15 -->
+                <div class="border border-gray-200 rounded-xl p-4 flex flex-col items-center space-y-3 hover:shadow-md transition-all bg-gray-50/50">
+                  <div class="w-full h-32 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-inner flex items-center justify-center p-2">
+                      <img src="images/mau_15.jpg" alt="Mẫu 15" class="max-h-full max-w-full object-contain">
+                  </div>
+                  <div class="w-full text-center">
+                      <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 15</h4>
+                      <p class="text-xs text-gray-500 mb-3">Super Mario<br>(Firmware 1.0.0 trở lên)</p>
+                      <button onclick="selectWatchFace(14)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
+                      Áp dụng mẫu này
+                      </button>
+                  </div>
+                  </div>
 
-
+            </div>
+            </div>
+        </div>
             </div>
             </div>
         </div>
@@ -890,11 +915,11 @@
       try {
         let buf = new Uint8Array([0x90]);  // 构造单字节命令
         await longValue.writeValue(buf);
-        console.log('Đã gửi lệnh chuyển đổi.');
+        console.log('Đã gửi lệnh chuyển đổi giao diện.');
       } catch (err) {
         console.log('Gửi thất bại:', err);
       } finally {
-        send90Button.innerHTML = '<i class="fa fa-send"></i> Chuyển đổi chế độ';
+        send90Button.innerHTML = '<i class="fa fa-send"></i> Chuyển đổi giao diện đồng hồ';
         send90Button.disabled = false;
       }
     }
