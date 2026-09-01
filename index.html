@@ -331,7 +331,7 @@
       </div>
 
       <!-- TAB 3: Cập nhật Firmware -->
-      <div id="tab3-content" class="tab-content hidden space-y-4">
+      <div id="tab5-content" class="tab-content hidden space-y-4">
         <div class="p-4 bg-white rounded-xl shadow-sm border border-gray-100 text-center py-8">
           <!-- Khung chứa căn giữa 2 nút -->
           <div class="w-full flex justify-center">
@@ -579,7 +579,7 @@
                   </div>
                   <div class="w-full text-center">
                       <h4 class="font-semibold text-gray-800">Mẫu Giao Diện 15</h4>
-                      <p class="text-xs text-gray-500 mb-3">Super Mario<br>(Firmware 1.0.0 trở lên)</p>
+                      <p class="text-xs text-gray-500 mb-3">Super Mario<br>(Firmware 0.8 trở lên)</p>
                       <button onclick="selectWatchFace(14)" class="watch-face-btn w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg text-sm font-medium transition-all shadow-sm">
                       Áp dụng mẫu này
                       </button>
@@ -590,6 +590,49 @@
             </div>
         </div>
 
+        <div id="tab3-content" class="tab-content hidden space-y-4">
+            <!-- Badge Tiêu đề -->
+            <div class="mb-4">
+              <span class="inline-block bg-sky-50 text-sky-700 font-semibold px-4 py-1.5 rounded-full text-sm border border-sky-200">
+                Danh sách firmware
+              </span>
+            </div>
+            <div class="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm px-4 py-2 rounded-lg my-3 font-medium">
+              <i class="fa-solid fa-circle-info text-amber-600"></i>
+              <span>Khuyến cáo nên sử dụng phiên bản mới nhất để có thể trải nghiệm nhiều tính năng hơn.</span>
+            </div>
+
+            <!-- Bảng danh sách Firmware -->
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+              <table class="w-full text-left text-sm text-slate-600 border-collapse">
+                <thead class="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
+                  <tr>
+                    <th class="p-3.5 w-12 text-center">No</th>
+                    <th class="p-3.5 w-20">Version</th>
+                    <th class="p-3.5">Mô tả</th>
+                    <th class="p-3.5 w-28 whitespace-nowrap">Ngày phát hành</th>
+                    <th class="p-3.5 w-40 text-center">Update ngay</th>
+                  </tr>
+                </thead>
+                <tbody id="fw-table-body" class="divide-y divide-slate-200">
+                  <!-- JS render động danh sách vào đây -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Nút & Thanh Tiến Trình (Chỉ hiển thị khi bấm cài đặt) -->
+            <div id="ota-progress-section" class="hidden mt-6 pt-4 border-t border-slate-100">
+              <div class="flex items-center justify-between mb-2">
+                <span id="ota-status-text" class="text-sm font-medium text-slate-700">Đang chuẩn bị nạp firmware...</span>
+                <span id="ota-percent" class="text-sm font-bold text-sky-600">0%</span>
+              </div>
+
+              <!-- Thanh tiến trình -->
+              <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden border border-slate-200">
+                <div id="ota-progress-bar" class="bg-sky-600 h-full w-0 transition-all duration-200 ease-out rounded-full"></div>
+              </div>
+            </div>
+        </div>
 
       <!-- 日志终端区域 -->
       <div class="space-y-2">
@@ -603,7 +646,7 @@
         </div>
 
         <div id="log-window" class="bg-gray-900 text-gray-100 text-xs md:text-sm rounded-lg h-48 md:h-64 overflow-y-auto p-3 font-mono">
-          <div class="text-gray-400 log-entry">Thiết bị đã được khởi động và đang chờ kết nối thiết bị....</div>
+          <div class="text-gray-400 log-entry">Đang chờ kết nối thiết bị....</div>
         </div>
       </div>
     </div>
@@ -837,6 +880,7 @@
         document.getElementById('calibration-button').classList.remove('opacity-50', 'cursor-not-allowed');
 
         enableWatchFaceButtons();
+        setFirmwareButtonsState(true);
 
         connectButton.innerHTML = '<i class="fa fa-disconnect"></i> Ngắt kết nối';
         connectButton.disabled = false;
@@ -969,6 +1013,24 @@
         return;
       }
 
+      const data_magic = new Uint8Array([0x14, 0x07, 0x19, 0x90, 0xEB, 0xF8, 0xE6, 0x6F]);
+
+      let data_pos = find_patten(firm_buf, data_magic);
+      let data_buf = null;
+      let data_size = 0;
+      let has_data = false;
+
+      if (data_pos != -1) {
+        has_data = true;
+
+        let data_offset = data_pos + 8;
+        data_buf = firm_buf.slice(data_offset);
+        data_size = data_buf.length;
+
+        firm_buf = firm_buf.slice(0, data_pos);
+        firm_size = firm_buf.length;
+      }
+
       let firm_magic = new Uint8Array([0x79, 0x13, 0xa5, 0xf9, 0x86, 0xec, 0x5a, 0x06]);
       let pos = find_patten(firm_buf, firm_magic);
       if (pos == -1) {
@@ -1022,12 +1084,44 @@
           sent += 128;
 
           // 更新进度条
-          const progress = Math.min(Math.round(100 * sent / totalSize), 100);
+          const progress = Math.min(Math.round(100 * sent / (totalSize + data_size)), 100);
           progressBar.style.width = `${progress}%`;
           progressText.textContent = `${progress}%`;
           document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
         }
 
+        if (has_data === true)
+        {
+          buf.fill(0xff);
+          buf[0] = 0x60;
+          view.setUint16(2, data_size, true);
+          await longValue.writeValue(buf);
+          let data_sent = 0;
+
+          for (let i = 0; i < data_size; i += 256) {
+            buf.fill(0xff);
+            buf[0] = 0x61;
+            buf.set(data_buf.slice(data_sent, data_sent + 128), 8);
+            await longValue.writeValue(buf);
+            data_sent += 128;
+
+            buf.fill(0xff);
+            buf[0] = 0x62;
+            buf.set(data_buf.slice(data_sent, data_sent + 128), 8);
+            await longValue.writeValue(buf);
+            data_sent += 128;
+
+            // Update status
+            const progress = Math.min(Math.round(100 * (sent + data_sent) / (totalSize + data_size)), 100);
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}%`;
+            document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
+          }
+        }
+
+
+        /* Đoạn này là gửi lệnh reset thiết bị */
+        console.log('Đã gửi hết dữ liệu, gửi lệnh khởi động lại thiết bị...');
         buf[0] = 0xa4;
         buf.fill(0, 1, 4);
         await longValue.writeValue(buf);
@@ -1155,7 +1249,7 @@
       document.getElementById('calibration-button').classList.add('opacity-50', 'cursor-not-allowed');
 
       disableWatchFaceButtons();
-
+      setFirmwareButtonsState(false);
       console.log('Thiết bị đã bị ngắt kết nối.');
     }
 
@@ -1548,101 +1642,6 @@
         disableWatchFaceButtons();
     });
 
-    async function onUpdateFont() {
-        const upfontBtn = document.getElementById('upfont-button');
-        const upfirmBtn = document.getElementById('upfirm-button');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('update_progress_bar');
-        const progressText = document.getElementById('update_progress_text');
-        const statusLabel = document.getElementById('update_status_label');
-
-        let font_buf, font_size;
-
-        // 1. Mở cửa sổ chọn file nhị phân (.bin)
-        try {
-            if (typeof addLog === 'function') addLog('Vui lòng chọn tập tin Font Data (.bin)...');
-
-            const [handle] = await window.showOpenFilePicker({
-                types: [{ description: 'Font Binary Files', accept: { 'application/octet-stream': ['.bin'] } }]
-            });
-            const file = await handle.getFile();
-            let abuf = await readFileAsArrayBuffer(file);
-            font_buf = new Uint8Array(abuf);
-            font_size = file.size;
-        } catch (err) {
-            if (typeof addLog === 'function') addLog('Hủy chọn file font hoặc lỗi đọc file.');
-            return;
-        }
-
-        // 2. Khóa nút và bật giao diện tiến trình
-        upfontBtn.disabled = true;
-        if (upfirmBtn) upfirmBtn.disabled = true;
-        upfontBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang ghi font...';
-
-        if (progressContainer) progressContainer.classList.remove('hidden');
-        if (statusLabel) statusLabel.textContent = 'Đang ghi Font Data...';
-        if (progressBar) progressBar.style.width = '0%';
-        if (progressText) progressText.textContent = '0%';
-
-        try {
-            // 3. Gói tin bắt tay khởi tạo Font Data (Mã lệnh: 0xc0)
-            let buf = new Uint8Array(136);
-            let view = new DataView(buf.buffer);
-            buf.fill(0xff);
-            buf[0] = 0x60;                      // Mã lệnh thông báo nạp font
-            view.setUint32(2, font_size, true);  // Kích thước tổng của file font (4 bytes)
-            await longValue.writeValue(buf);
-
-            let sent = 0;
-
-            // 4. Vòng lặp truyền dữ liệu font theo từng khối (mỗi lần gửi 128 bytes)
-            for (let i = 0; i < font_size; i += 128) {
-                buf.fill(0xff);
-                buf[0] = 0x61;                  // Mã lệnh truyền data font
-                view.setUint16(1, sent, false);
-
-                // Cắt 128 bytes chèn vào buffer từ vị trí byte thứ 8
-                const chunk = font_buf.slice(sent, sent + 128);
-                buf.set(chunk, 8);
-                if ((sent + chunk.length) < font_size){
-                  buf[3] = chunk.length;
-                } else {
-                  buf[3] = font_size - sent;
-                }
-
-                await longValue.writeValue(buf);
-                sent += chunk.length;
-
-                // Cập nhật thanh tiến trình
-                const progress = Math.min(Math.round(100 * sent / font_size), 100);
-                if (progressBar) progressBar.style.width = `${progress}%`;
-                if (progressText) progressText.textContent = `${progress}%`;
-                console.log(`Đã gửi ${sent}/${font_size} bytes`);
-                printCArrayToConsole(buf, 'font_buff');
-            }
-
-            // 5. Gói tin kết thúc quá trình ghi font (Mã lệnh: 0xc4)
-            buf.fill(0);
-            buf[0] = 0x62;
-            await longValue.writeValue(buf);
-
-            if (typeof addLog === 'function') addLog(`Nạp Font Data thành công! (${font_size} bytes)`);
-
-        } catch (error) {
-            console.error('Lỗi khi nạp font data:', error);
-            if (typeof addLog === 'function') addLog('Lỗi nạp font: ' + error.message);
-        } finally {
-            // 6. Khôi phục lại trạng thái giao diện
-            upfontBtn.innerHTML = '<i class="fa fa-font"></i> Ghi Font Data';
-            upfontBtn.disabled = false;
-            if (upfirmBtn) upfirmBtn.disabled = false;
-
-            setTimeout(() => {
-                if (progressContainer) progressContainer.classList.add('hidden');
-            }, 2000);
-        }
-    }
-
     // Hàm xử lý khi người dùng bấm chọn một mẫu giao diện
     async function selectWatchFace(faceId) {
         console.log(`Đã chọn giao diện đồng hồ số: ${faceId}`);
@@ -1709,8 +1708,231 @@
             upFwBtn.disabled = false;
             upFwBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
-
     }
+
+    // Danh sách các bản Firmware
+    const firmwareList = [
+      {
+        no: 1,
+        version: "0.7",
+        desc: "Phiên bản đầu tiên, hỗ trợ 14 chế độ hiển thị cơ bản và truyền hình ảnh",
+        date: "23/08/2026",
+        url: "firmware/ONE-2.13L-V0.7.bin"
+      },
+      {
+        no: 2,
+        version: "0.8",
+        desc: "Bản vá sửa lỗi OTA cho phép update lên các phiên bản hỗ trợ nhiều font chữ, hiệu ứng hơn.",
+        date: "31/08/2026",
+        url: "firmware/ONE-2.13L-V0.8.bin"
+      },
+      // {
+      //   no: 3,
+      //   version: "1.0",
+      //   desc: "Phiên bản 1.0, hỗ trợ nhiều chế độ hiển thị với nhiều mẫu font chữ đẹp mắt",
+      //   date: "01/09/2026",
+      //   url: "firmware/ONE-2.13L-V1.0.bin"
+      // }
+    ];
+
+    let isBleConnected = false;
+
+    // Hàm render bảng firmware
+    function renderFirmwareTable() {
+      const tbody = document.getElementById("fw-table-body");
+      tbody.innerHTML = firmwareList.map(fw => `
+        <tr class="hover:bg-sky-50/40 transition-colors">
+          <td class="p-3.5 text-center text-slate-500 font-medium">${fw.no}</td>
+          <td class="p-3.5 font-semibold text-slate-800">${fw.version}</td>
+          <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
+          <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
+          <td class="p-3.5 text-center">
+            <!-- disabled khi chưa kết nối, kèm style mờ/cursor-not-allowed -->
+            <button onclick="installFirmware('${fw.url}', '${fw.version}')"
+                    ${!isBleConnected ? 'disabled' : ''}
+                    class="btn-install bg-sky-700 hover:bg-sky-800 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:transform-none text-white font-medium px-4 py-1.5 rounded-full text-xs transition duration-150 shadow-sm">
+              Update ngay
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+    renderFirmwareTable();
+
+    function setFirmwareButtonsState(enabled) {
+      isBleConnected = enabled;
+      const buttons = document.querySelectorAll('.btn-install');
+      buttons.forEach(btn => {
+        btn.disabled = !enabled;
+      });
+    }
+
+    // Cập nhật UI thanh tiến trình
+    function updateProgressUI(percent, message) {
+      const progressBar = document.getElementById('ota-progress-bar');
+      const percentText = document.getElementById('ota-percent');
+      const statusText = document.getElementById('ota-status-text');
+
+      progressBar.style.width = `${percent}%`;
+      percentText.innerText = `${percent}%`;
+      if (message) statusText.innerText = message;
+    }
+
+    async function installFirmware(fileUrl, version) {
+      const progressSection = document.getElementById('ota-progress-section');
+      const statusText = document.getElementById('ota-status-text');
+      const progressBar = document.getElementById('ota-progress-bar');
+      const percentText = document.getElementById('ota-percent');
+
+      if (!confirm('Cài firmware phiên bản ' + version + ' vào thiết bị đang kết nối?' + String.fromCharCode(10) +
+               'Thiết bị sẽ khởi động lại sau khi cập nhật hoàn tất.' + String.fromCharCode(10) +
+               ' Tuyệt đối: ' + String.fromCharCode(10) +
+               '   - KHÔNG tắt nguồn giữa chừng' + String.fromCharCode(10) +
+               '   - KHÔNG thoát trang web giữa chừng')) return;
+
+      let firm_buf, firm_size;
+      let finished = false;
+
+      try {
+
+        // Vô hiệu hóa toàn bộ nút cài đặt lúc đang chạy
+        document.querySelectorAll('.btn-install').forEach(btn => btn.disabled = true);
+
+        // Mở thanh tiến trình
+        progressSection.classList.remove('hidden');
+        updateProgressUI(0, `Đang tải bản Firmware v${version} từ máy chủ...`);
+
+        // 1. Tải file binary từ link
+        const response = await fetch(fileUrl);
+        if (!response.ok) throw new Error("Không thể tải file firmware từ server");
+        const abuf = await response.arrayBuffer();
+
+        firm_buf = new Uint8Array(abuf);
+        firm_size = abuf.byteLength;
+
+        const data_magic = new Uint8Array([0x14, 0x07, 0x19, 0x90, 0xEB, 0xF8, 0xE6, 0x6F]);
+
+        let data_pos = find_patten(firm_buf, data_magic);
+        let data_buf = null;
+        let data_size = 0;
+        let has_data = false;
+
+        if (data_pos != -1) {
+          has_data = true;
+
+          let data_offset = data_pos + 8;
+          data_buf = firm_buf.slice(data_offset);
+          data_size = data_buf.length;
+
+          firm_buf = firm_buf.slice(0, data_pos);
+          firm_size = firm_buf.length;
+        }
+
+        let firm_magic = new Uint8Array([0x79, 0x13, 0xa5, 0xf9, 0x86, 0xec, 0x5a, 0x06]);
+        let pos = find_patten(firm_buf, firm_magic);
+        if (pos == -1) {
+          console.log('Firmware không hợp lệ: Không tìm thấy số phiên bản!');
+          throw new Error("Firmware không hợp lệ: Không tìm thấy số phiên bản!");
+        }
+
+        let major = firm_buf[pos + 9];
+        let minor = firm_buf[pos + 8];
+        let firm_ver = firm_buf[pos + 9] * 256 + firm_buf[pos + 8];
+        let firm_crc = CRC32.buf(firm_buf);
+
+        console.log(`firmware version ${major}.${minor} - kích cỡ: ${firm_size} - CRC: ${(firm_crc >>> 0).toString(16)}`);
+
+        let buf = new Uint8Array(136);
+        let view = new DataView(buf.buffer);
+        buf[0] = 0xa0;
+        view.setUint16(2, firm_size, true);
+        await longValue.writeValue(buf);
+
+        let sent = 0;
+        const totalSize = firm_size + 64;
+
+        for (let i = 0; i < totalSize; i += 256) {
+          buf.fill(0xff);
+          if (i === 0) {
+            view.setUint32(8, 0x00aa5170, true);
+            view.setUint32(12, firm_size, true);
+            view.setUint32(16, firm_crc, true);
+            view.setUint32(36, 0xa50f0000 + firm_ver, true);
+            buf[40] = 0;
+            buf[0] = 0xa2;
+            buf.set(firm_buf.slice(sent, sent + 64), 72);
+            await longValue.writeValue(buf);
+            sent += 64;
+          } else {
+            buf[0] = 0xa2;
+            buf.set(firm_buf.slice(sent, sent + 128), 8);
+            await longValue.writeValue(buf);
+            sent += 128;
+          }
+          buf[0] = 0xa3;
+          buf.set(firm_buf.slice(sent, sent + 128), 8);
+          await longValue.writeValue(buf);
+          sent += 128;
+
+          // 更新进度条
+          const progress = Math.min(Math.round(100 * sent / (totalSize + data_size)), 100);
+          updateProgressUI(progress, `Đang cài đặt Firmware v${version} ...`);
+          // progressBar.style.width = `${progress}%`;
+          // percentText.textContent = `${progress}%`;
+          // document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
+        }
+
+        if (has_data === true)
+        {
+          buf.fill(0xff);
+          buf[0] = 0x60;
+          view.setUint16(2, data_size, true);
+          await longValue.writeValue(buf);
+          let data_sent = 0;
+
+          for (let i = 0; i < data_size; i += 256) {
+            buf.fill(0xff);
+            buf[0] = 0x61;
+            buf.set(data_buf.slice(data_sent, data_sent + 128), 8);
+            await longValue.writeValue(buf);
+            data_sent += 128;
+
+            buf.fill(0xff);
+            buf[0] = 0x62;
+            buf.set(data_buf.slice(data_sent, data_sent + 128), 8);
+            await longValue.writeValue(buf);
+            data_sent += 128;
+
+            // Update status
+            const progress = Math.min(Math.round(100 * (sent + data_sent) / (totalSize + data_size)), 100);
+            updateProgressUI(progress, `Đang cài đặt Firmware v${version} ...`);
+            // progressBar.style.width = `${progress}%`;
+            // progressText.textContent = `${progress}%`;
+            // document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
+          }
+        }
+
+        finished = true;
+        /* Đoạn này là gửi lệnh reset thiết bị */
+        console.log('Đã gửi hết dữ liệu, gửi lệnh khởi động lại thiết bị...');
+        buf[0] = 0xa4;
+        buf.fill(0, 1, 4);
+        await longValue.writeValue(buf);
+        console.log('Hoàn thành nâng cấp!');
+        updateProgressUI(100, `Hoàn thành nâng cấp!`);
+
+      } catch (error) {
+        if (finished != true) {
+          console.error("Lỗi cập nhật:", error);
+          updateProgressUI(0, `Lỗi: ${error.message}`);
+          alert(`Cập nhật thất bại: ${error.message}`);
+          // document.getElementById('progress-container').classList.add('hidden');
+        }
+      } finally {
+        document.querySelectorAll('.btn-install').forEach(btn => btn.disabled = false);
+      }
+    }
+
   </script>
 </body>
 </html>
