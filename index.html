@@ -1795,14 +1795,11 @@
 
       try {
 
-        // Vô hiệu hóa toàn bộ nút cài đặt lúc đang chạy
         document.querySelectorAll('.btn-install').forEach(btn => btn.disabled = true);
 
-        // Mở thanh tiến trình
         progressSection.classList.remove('hidden');
         updateProgressUI(0, `Đang tải bản Firmware v${version} từ máy chủ...`);
 
-        // 1. Tải file binary từ link
         const response = await fetch(fileUrl);
         if (!response.ok) throw new Error("Không thể tải file firmware từ server");
         const abuf = await response.arrayBuffer();
@@ -1877,9 +1874,6 @@
           // 更新进度条
           const progress = Math.min(Math.round(100 * sent / (totalSize + data_size)), 100);
           updateProgressUI(progress, `Đang cài đặt Firmware v${version} ...`);
-          // progressBar.style.width = `${progress}%`;
-          // percentText.textContent = `${progress}%`;
-          // document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
         }
 
         if (has_data === true)
@@ -1906,30 +1900,23 @@
             // Update status
             const progress = Math.min(Math.round(100 * (sent + data_sent) / (totalSize + data_size)), 100);
             updateProgressUI(progress, `Đang cài đặt Firmware v${version} ...`);
-            // progressBar.style.width = `${progress}%`;
-            // progressText.textContent = `${progress}%`;
-            // document.getElementById('update_progress').textContent = `Tiến độ: ${progress}%`;
           }
         }
 
         finished = true;
-        /* Đoạn này là gửi lệnh reset thiết bị */
+
         console.log('Đã gửi hết dữ liệu, gửi lệnh khởi động lại thiết bị...');
+        updateProgressUI(100, `Hoàn thành!`);
+        /* Đoạn này là gửi lệnh reset thiết bị */
         buf[0] = 0xa4;
         buf.fill(0, 1, 4);
         await longValue.writeValue(buf);
-        console.log('Hoàn thành nâng cấp!');
-        updateProgressUI(100, `Hoàn thành nâng cấp!`);
-
       } catch (error) {
         if (finished != true) {
           console.error("Lỗi cập nhật:", error);
           updateProgressUI(0, `Lỗi: ${error.message}`);
           alert(`Cập nhật thất bại: ${error.message}`);
-          // document.getElementById('progress-container').classList.add('hidden');
         }
-      } finally {
-        document.querySelectorAll('.btn-install').forEach(btn => btn.disabled = false);
       }
     }
 
