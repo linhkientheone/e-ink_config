@@ -603,7 +603,7 @@
             </div>
 
             <!-- Bảng danh sách Firmware -->
-            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+            <!-- <div class="overflow-x-auto border border-slate-200 rounded-lg">
               <table class="w-full text-left text-sm text-slate-600 border-collapse">
                 <thead class="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
                   <tr>
@@ -615,10 +615,11 @@
                   </tr>
                 </thead>
                 <tbody id="fw-table-body" class="divide-y divide-slate-200">
-                  <!-- JS render động danh sách vào đây -->
                 </tbody>
               </table>
-            </div>
+            </div> -->
+
+            <div id="fw-list-container"></div>
 
             <!-- Nút & Thanh Tiến Trình (Chỉ hiển thị khi bấm cài đặt) -->
             <div id="ota-progress-section" class="hidden mt-6 pt-4 border-t border-slate-100">
@@ -1737,25 +1738,98 @@
 
     let isBleConnected = false;
 
-    // Hàm render bảng firmware
+    // // Hàm render bảng firmware
+    // function renderFirmwareTable() {
+    //   const tbody = document.getElementById("fw-table-body");
+    //   tbody.innerHTML = firmwareList.map(fw => `
+    //     <tr class="hover:bg-sky-50/40 transition-colors">
+    //       <td class="p-3.5 text-center text-slate-500 font-medium">${fw.no}</td>
+    //       <td class="p-3.5 font-semibold text-slate-800">${fw.version}</td>
+    //       <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
+    //       <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
+    //       <td class="p-3.5 text-center">
+    //         <!-- disabled khi chưa kết nối, kèm style mờ/cursor-not-allowed -->
+    //         <button onclick="installFirmware('${fw.url}', '${fw.version}')"
+    //                 ${!isBleConnected ? 'disabled' : ''}
+    //                 class="btn-install bg-sky-700 hover:bg-sky-800 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:transform-none text-white font-medium px-4 py-1.5 rounded-full text-xs transition duration-150 shadow-sm">
+    //           Update ngay
+    //         </button>
+    //       </td>
+    //     </tr>
+    //   `).join('');
+    // }
+
+
     function renderFirmwareTable() {
-      const tbody = document.getElementById("fw-table-body");
-      tbody.innerHTML = firmwareList.map(fw => `
-        <tr class="hover:bg-sky-50/40 transition-colors">
-          <td class="p-3.5 text-center text-slate-500 font-medium">${fw.no}</td>
-          <td class="p-3.5 font-semibold text-slate-800">${fw.version}</td>
-          <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
-          <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
-          <td class="p-3.5 text-center">
-            <!-- disabled khi chưa kết nối, kèm style mờ/cursor-not-allowed -->
-            <button onclick="installFirmware('${fw.url}', '${fw.version}')"
-                    ${!isBleConnected ? 'disabled' : ''}
-                    class="btn-install bg-sky-700 hover:bg-sky-800 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:transform-none text-white font-medium px-4 py-1.5 rounded-full text-xs transition duration-150 shadow-sm">
-              Update ngay
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      const container = document.getElementById("fw-list-container");
+
+      // 1. Giao diện Card cho Mobile (ẩn trên PC: md:hidden)
+      const mobileCardsHtml = `
+        <div class="flex flex-col gap-3 md:hidden">
+          ${firmwareList.map(fw => `
+            <div class="border border-slate-200 rounded-xl p-3.5 bg-white shadow-xs">
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">#${fw.no}</span>
+                  <span class="text-base font-bold text-slate-800">v${fw.version}</span>
+                </div>
+                <span class="text-xs text-slate-400">${fw.date}</span>
+              </div>
+
+              <div class="text-xs text-slate-600 leading-relaxed my-2">
+                ${fw.desc}
+              </div>
+
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
+                <a href="${fw.url}" download class="text-xs text-sky-600 font-medium hover:underline flex items-center gap-1">
+                  <i class="fa-solid fa-download"></i> Tải về
+                </a>
+                <button onclick="installFirmware('${fw.url}', '${fw.version}')"
+                        ${!isBleConnected ? 'disabled' : ''}
+                        class="btn-install bg-purple-600 hover:bg-purple-700 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold px-4 py-1.5 rounded-full text-xs transition shadow-xs">
+                  Update ngay
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // 2. Giao diện Bảng cho PC/Tablet (ẩn trên Mobile: hidden md:block)
+      const desktopTableHtml = `
+        <div class="hidden md:block overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="w-full text-left text-sm text-slate-600 border-collapse">
+            <thead class="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
+              <tr class="divide-x divide-slate-200">
+                <th class="p-3.5 w-12 text-center">STT</th>
+                <th class="p-3.5 w-20 text-center">Phiên bản</th>
+                <th class="p-3.5 text-center">Mô tả</th>
+                <th class="p-3.5 w-32 whitespace-nowrap text-center">Ngày phát hành</th>
+                <th class="p-3.5 w-28 text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              ${firmwareList.map(fw => `
+                <tr class="hover:bg-sky-50/30 transition-colors divide-x divide-slate-200">
+                  <td class="p-3.5 text-center text-slate-400 font-medium">${fw.no}</td>
+                  <td class="p-3.5 font-bold text-slate-800">${fw.version}</td>
+                  <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
+                  <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
+                  <td class="p-3.5 text-center">
+                    <button onclick="installFirmware('${fw.url}', '${fw.version}')"
+                            ${!isBleConnected ? 'disabled' : ''}
+                            class="btn-install bg-purple-600 hover:bg-purple-700 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium px-4 py-1.5 rounded-full text-xs transition shadow-xs">
+                      Update ngay
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = mobileCardsHtml + desktopTableHtml;
     }
     renderFirmwareTable();
 
