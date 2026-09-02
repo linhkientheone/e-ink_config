@@ -599,25 +599,12 @@
             </div>
             <div class="flex items-center justify-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm px-4 py-2 rounded-lg my-3 font-medium">
               <i class="fa-solid fa-circle-info text-amber-600"></i>
-              <span>Khuyến cáo nên sử dụng phiên bản mới nhất để có thể trải nghiệm nhiều tính năng hơn.</span>
+              <span>
+                <li>Khuyến cáo nên sử dụng phiên bản mới nhất để có thể trải nghiệm nhiều tính năng hơn.</li>
+                <li>Khi cập nhật xong thiết bị sẽ tự khởi động lại để load firmware mới, Anh em vui lòng kết nối lại để tiếp tục cài đặt</li>
+              </span>
             </div>
 
-            <!-- Bảng danh sách Firmware -->
-            <!-- <div class="overflow-x-auto border border-slate-200 rounded-lg">
-              <table class="w-full text-left text-sm text-slate-600 border-collapse">
-                <thead class="bg-slate-50 text-slate-800 font-semibold border-b border-slate-200">
-                  <tr>
-                    <th class="p-3.5 w-12 text-center">No</th>
-                    <th class="p-3.5 w-20">Version</th>
-                    <th class="p-3.5">Mô tả</th>
-                    <th class="p-3.5 w-28 whitespace-nowrap">Ngày phát hành</th>
-                    <th class="p-3.5 w-40 text-center">Update ngay</th>
-                  </tr>
-                </thead>
-                <tbody id="fw-table-body" class="divide-y divide-slate-200">
-                </tbody>
-              </table>
-            </div> -->
 
             <div id="fw-list-container"></div>
 
@@ -1716,49 +1703,38 @@
       {
         no: 1,
         version: "0.7",
-        desc: "Phiên bản đầu tiên, hỗ trợ 14 chế độ hiển thị cơ bản và truyền hình ảnh.<br><em class='text-amber-700 text-xs block mt-1'>* Lưu ý: anh em nào đang ở bản 0.7 này nếu muốn lên bản cao hơn hỗ trợ đầy đủ các font, vui lòng thực hiện cập nhật lên phiên bản 0.8 02 lần liên tiếp.</em>",
+        desc: "Phiên bản đầu tiên, hỗ trợ 14 chế độ hiển thị cơ bản và truyền hình ảnh.<br><em class='text-amber-700 text-xs block mt-1'>* Lưu ý: anh em nào đang ở phiên bản <strong class='font-bold text-sm text-amber-900'>v0.7</strong> này nếu muốn lên bản cao hơn hỗ trợ đầy đủ các font, vui lòng thực hiện cập nhật lên phiên bản <strong class='font-bold text-sm text-amber-900'>v0.8</strong> trước, sau đó mới tiếp tục cập nhật tiếp lên phiên bản mong muốn.</em>",
         date: "23/08/2026",
-        url: "firmware/ONE-2.13L-V0.7.bin"
+        url: "firmware/ONE-2.13L-V0.7.bin",
+        active: true
       },
       {
         no: 2,
         version: "0.8",
-        desc: "Bản vá sửa lỗi OTA cho phép update lên các phiên bản hỗ trợ nhiều font chữ, hiệu ứng hơn.",
+        desc: "Bản vá sửa lỗi OTA cho phép update lên các phiên bản hỗ trợ nhiều font chữ, hiệu ứng hơn. Đồng thời thêm giao diện số 15 (Super Mario).",
         date: "31/08/2026",
-        url: "firmware/ONE-2.13L-V0.8.bin"
+        url: "firmware/ONE-2.13L-V0.8.bin",
+        active: true
       },
-      // {
-      //   no: 3,
-      //   version: "1.0",
-      //   desc: "Phiên bản 1.0, hỗ trợ nhiều chế độ hiển thị với nhiều mẫu font chữ đẹp mắt",
-      //   date: "01/09/2026",
-      //   url: "firmware/ONE-2.13L-V1.0.bin"
-      // }
+      {
+        no: 3,
+        version: "1.0",
+        desc: "Phiên bản 1.0, hỗ trợ nhiều chế độ hiển thị với nhiều mẫu font chữ đẹp mắt. <br>Thêm một số cài đặt về định dạng giờ 12/24h, cài đặt lưới cho lịch tháng, bổ sung một số chế độ màn hình dọc,...",
+        date: "05/09/2026<br>(dự kiến)",
+        url: "firmware/ONE-2.13L-V1.0.bin",
+        active: false
+      },
+      {
+        no: 4,
+        version: "1.1",
+        desc: "Phiên bản 1.1, bổ sung chế độ màn hình tự thiết kế, ",
+        date: "15/09/2026<br>(dự kiến)",
+        url: "firmware/ONE-2.13L-V1.1.bin",
+        active: false
+      }
     ];
 
     let isBleConnected = false;
-
-    // // Hàm render bảng firmware
-    // function renderFirmwareTable() {
-    //   const tbody = document.getElementById("fw-table-body");
-    //   tbody.innerHTML = firmwareList.map(fw => `
-    //     <tr class="hover:bg-sky-50/40 transition-colors">
-    //       <td class="p-3.5 text-center text-slate-500 font-medium">${fw.no}</td>
-    //       <td class="p-3.5 font-semibold text-slate-800">${fw.version}</td>
-    //       <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
-    //       <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
-    //       <td class="p-3.5 text-center">
-    //         <!-- disabled khi chưa kết nối, kèm style mờ/cursor-not-allowed -->
-    //         <button onclick="installFirmware('${fw.url}', '${fw.version}')"
-    //                 ${!isBleConnected ? 'disabled' : ''}
-    //                 class="btn-install bg-sky-700 hover:bg-sky-800 active:scale-95 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:transform-none text-white font-medium px-4 py-1.5 rounded-full text-xs transition duration-150 shadow-sm">
-    //           Update ngay
-    //         </button>
-    //       </td>
-    //     </tr>
-    //   `).join('');
-    // }
-
 
     function renderFirmwareTable() {
       const container = document.getElementById("fw-list-container");
@@ -1771,7 +1747,7 @@
               <div class="flex items-center justify-between gap-2 mb-1.5">
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">#${fw.no}</span>
-                  <span class="text-base font-bold text-slate-800">v${fw.version}</span>
+                  <span class="text-base font-bold text-slate-800">ONE-2.13L-V${fw.version}</span>
                 </div>
                 <span class="text-xs text-slate-400">${fw.date}</span>
               </div>
@@ -1782,7 +1758,8 @@
 
               <div class="flex items-center justify-between pt-2 border-t border-slate-100 mt-2">
                 <button onclick="installFirmware('${fw.url}', '${fw.version}')"
-                        ${!isBleConnected ? 'disabled' : ''}
+                        data-active="${fw.active === true}"
+                        ${(!isBleConnected || !fw.active) ? 'disabled' : ''}
                         class="btn-install bg-purple-600 hover:bg-purple-700 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-semibold px-4 py-1.5 rounded-full text-xs transition shadow-xs">
                   Update ngay
                 </button>
@@ -1809,12 +1786,13 @@
               ${firmwareList.map(fw => `
                 <tr class="hover:bg-sky-50/30 transition-colors divide-x divide-slate-200">
                   <td class="p-3.5 text-center text-slate-400 font-medium">${fw.no}</td>
-                  <td class="p-3.5 font-bold text-slate-800">${fw.version}</td>
+                  <td class="p-3.5 font-bold text-slate-400 whitespace-nowrap">ONE-2.13L-V${fw.version}</td>
                   <td class="p-3.5 text-slate-600 leading-relaxed">${fw.desc}</td>
-                  <td class="p-3.5 whitespace-nowrap text-slate-500">${fw.date}</td>
+                  <td class="p-3.5 text-slate-500">${fw.date}</td>
                   <td class="p-3.5 text-center">
                     <button onclick="installFirmware('${fw.url}', '${fw.version}')"
-                            ${!isBleConnected ? 'disabled' : ''}
+                            data-active="${fw.active === true}"
+                            ${(!isBleConnected || !fw.active) ? 'disabled' : ''}
                             class="btn-install bg-purple-600 hover:bg-purple-700 active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-medium px-4 py-1.5 rounded-full text-xs transition shadow-xs">
                       Update ngay
                     </button>
@@ -1834,7 +1812,11 @@
       isBleConnected = enabled;
       const buttons = document.querySelectorAll('.btn-install');
       buttons.forEach(btn => {
-        btn.disabled = !enabled;
+        // Đọc cờ data-active đã lưu trên thẻ
+        const isFwActive = btn.dataset.active === 'true';
+
+        // Chỉ enable nếu Bluetooth kết nối VÀ firmware được active
+        btn.disabled = !(enabled && isFwActive);
       });
     }
 
