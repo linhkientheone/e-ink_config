@@ -802,6 +802,71 @@
     var deviceTimeBase = null;     // 设备时间基准值
 
     // 格式化时间显示
+    // ================================================================
+    // [FIX] solarToLunar: Cross-browser Solar->Lunar calendar converter
+    //
+    // Problem: toLocaleDateString('zh-CN-u-ca-chinese', {year:'numeric'})
+    //   - Chrome/Android: returns "2026壬午年" -> parseInt() = 2026  OK
+    //   - iOS WebKit/Bluefy: returns "甲午年" (no digits!) -> parseInt() = NaN
+    //     => NaN - 2020 = NaN => Uint8Array coerces NaN to 0 => buf[9]=0
+    //     => firmware: l_year=0 => displays 0+2020 = 2020 on screen
+    //
+    // Fix: Pure JS algorithm using LUNAR_INFO table, identical to
+    //      firmware's lunar_year_info[32] in user_custs1_impl.c line 181.
+    //      Works on ALL browsers regardless of locale support.
+    // ================================================================
+    const LUNAR_INFO = [
+      0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60,  // 2020-2024
+      0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,  // 2025-2029
+      0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0,  // 2030-2034
+      0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,  // 2035-2039
+      0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577,  // 2040-2044
+      0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,  // 2045-2049
+      0x14b63, 0x09370,                               // 2050-2051
+    ];
+    const LUNAR_BASE_JD = 2458874; // JD of 2020-01-25 = Lunar New Year 2020
+
+    function _toJD(y, m, d) {
+      const a = Math.floor((14 - m) / 12);
+      const yy = y + 4800 - a, mm = m + 12 * a - 3;
+      return d + Math.floor((153*mm+2)/5) + 365*yy +
+             Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) - 32045;
+    }
+    function _lmDays(ly, lm) {
+      const info = LUNAR_INFO[ly], leap = info & 0xf;
+      const bit = (lm > leap && leap > 0) ? (16-lm) : (17-lm);
+      return (info & (1 << bit)) ? 30 : 29;
+    }
+    function _leapDays(ly) {
+      const info = LUNAR_INFO[ly];
+      return (info & 0xf) ? ((info & 0x10000) ? 30 : 29) : 0;
+    }
+    // solarToLunar(year, month, day) -- month is 1-based
+    // Returns { lyear: offset_from_2020, lmonth: 1-12, lday: 1-30, isLeap: bool }
+    function solarToLunar(sy, sm, sd) {
+      let off = _toJD(sy, sm, sd) - LUNAR_BASE_JD, ly = 0;
+      while (ly < LUNAR_INFO.length) {
+        const leap = LUNAR_INFO[ly] & 0xf;
+        let yd = 0;
+        for (let m=1; m<=12; m++) yd += _lmDays(ly, m);
+        if (leap) yd += _leapDays(ly);
+        if (off < yd) break;
+        off -= yd; ly++;
+      }
+      const leapM = LUNAR_INFO[ly] & 0xf;
+      let leapDone = false;
+      for (let m=1; m<=12; m++) {
+        if (!leapDone && leapM > 0 && m === leapM+1) {
+          const ld = _leapDays(ly);
+          if (off < ld) return { lyear:ly, lmonth:leapM, lday:off+1, isLeap:true };
+          off -= ld; leapDone = true;
+        }
+        const md = _lmDays(ly, m);
+        if (off < md) return { lyear:ly, lmonth:m, lday:off+1, isLeap:false };
+        off -= md;
+      }
+      return { lyear:ly, lmonth:12, lday:off+1, isLeap:false };
+    }
     function formatTime(year, month, mday, hour, min, sec) {
       month += 1;
       return `${year}-${month.toString().padStart(2, '0')}-${mday.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
@@ -957,16 +1022,21 @@
             minute = now.getMinutes(),
             second = now.getSeconds();
 
-        let locale_str = now.toLocaleDateString('zh-CN-u-ca-chinese',{month:'numeric',day:'numeric'});
-        let l_month = locale_str.startsWith('闰') ? 128 : 0;
-        if (l_month) locale_str = locale_str.slice(1);
-        let [l_month_num, l_day] = locale_str.split('-').map(Number);
-        l_month += l_month_num;
-        let l_year = parseInt(now.toLocaleDateString('zh-CN-u-ca-chinese',{year:'numeric'}));
-        console.log('Năm Âm lịch:', l_year, 'Tháng:', l_month, 'Ngày:', l_day);
+        // [FIX] Use solarToLunar() - works on iOS WebKit/Bluefy and all browsers.
+        // Old toLocaleDateString('zh-CN-u-ca-chinese') returned "甲午年" on iOS
+        // (no digits) -> parseInt = NaN -> buf[9] = 0 -> firmware year = 2020.
+        // month+1 because JS getMonth() is 0-based; solarToLunar needs 1-based.
+        const lunar = solarToLunar(year, month + 1, mday);
+        let l_year  = lunar.lyear;    // offset from 2020, e.g. 2026 -> 6
+        let l_month = lunar.lmonth;   // 1-12
+        let l_day   = lunar.lday;     // 1-30
+        if (lunar.isLeap) l_month |= 0x80; // bit7 = leap month (matches firmware)
+        console.log('Năm Âm lịch:', l_year + 2020,
+                    'Tháng:', l_month & 0x7f, lunar.isLeap ? '(Nhuận)':'', 'Ngày:', l_day);
 
         let buf = new Uint8Array(12);
-        buf.set([0x91, year % 256, Math.floor(year / 256), month, mday, hour, minute, second, wday, l_year - 2020, l_month - 1, l_day]);
+        // Layout matches firmware clock_set(): buf[9]=l_year, buf[10]=l_month(0-based), buf[11]=l_day
+        buf.set([0x91, year%256, Math.floor(year/256), month, mday, hour, minute, second, wday, l_year, l_month - 1, l_day]);
         await longValue.writeValue(buf);
 
         // 更新设备时间基准值
