@@ -817,8 +817,8 @@
     // ================================================================
     const LUNAR_INFO = [
       0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60,  // 2020-2024
-      0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,  // 2025-2029
-      0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0,  // 2030-2034
+      0x0a6e6, 0x0a4f0, 0x05260, 0x0ea65, 0x0d520,  // 2025-2029
+      0x0daa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0,  // 2030-2034
       0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,  // 2035-2039
       0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577,  // 2040-2044
       0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,  // 2045-2049
@@ -833,39 +833,49 @@
              Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) - 32045;
     }
     function _lmDays(ly, lm) {
-      const info = LUNAR_INFO[ly], leap = info & 0xf;
-      const bit = (lm > leap && leap > 0) ? (16-lm) : (17-lm);
-      return (info & (1 << bit)) ? 30 : 29;
+      return (LUNAR_INFO[ly] & (0x10000 >> lm)) ? 30 : 29;
     }
     function _leapDays(ly) {
       const info = LUNAR_INFO[ly];
       return (info & 0xf) ? ((info & 0x10000) ? 30 : 29) : 0;
     }
+    function _lYearDays(ly) {
+      let sum = 0;
+      for (let m = 1; m <= 12; m++) sum += _lmDays(ly, m);
+      sum += _leapDays(ly);
+      return sum;
+    }
     // solarToLunar(year, month, day) -- month is 1-based
     // Returns { lyear: offset_from_2020, lmonth: 1-12, lday: 1-30, isLeap: bool }
     function solarToLunar(sy, sm, sd) {
-      let off = _toJD(sy, sm, sd) - LUNAR_BASE_JD, ly = 0;
+      let off = _toJD(sy, sm, sd) - LUNAR_BASE_JD;
+      if (off < 0) return null;
+      let ly = 0;
       while (ly < LUNAR_INFO.length) {
-        const leap = LUNAR_INFO[ly] & 0xf;
-        let yd = 0;
-        for (let m=1; m<=12; m++) yd += _lmDays(ly, m);
-        if (leap) yd += _leapDays(ly);
+        const yd = _lYearDays(ly);
         if (off < yd) break;
-        off -= yd; ly++;
+        off -= yd;
+        ly++;
       }
+      if (ly >= LUNAR_INFO.length) return null;
+
       const leapM = LUNAR_INFO[ly] & 0xf;
-      let leapDone = false;
-      for (let m=1; m<=12; m++) {
-        if (!leapDone && leapM > 0 && m === leapM+1) {
-          const ld = _leapDays(ly);
-          if (off < ld) return { lyear:ly, lmonth:leapM, lday:off+1, isLeap:true };
-          off -= ld; leapDone = true;
-        }
+      for (let m = 1; m <= 12; m++) {
         const md = _lmDays(ly, m);
-        if (off < md) return { lyear:ly, lmonth:m, lday:off+1, isLeap:false };
+        if (off < md) {
+          return { lyear: ly, lmonth: m, lday: off + 1, isLeap: false };
+        }
         off -= md;
+
+        if (leapM > 0 && m === leapM) {
+          const ld = _leapDays(ly);
+          if (off < ld) {
+            return { lyear: ly, lmonth: m, lday: off + 1, isLeap: true };
+          }
+          off -= ld;
+        }
       }
-      return { lyear:ly, lmonth:12, lday:off+1, isLeap:false };
+      return { lyear: ly, lmonth: 12, lday: off + 1, isLeap: false };
     }
     function formatTime(year, month, mday, hour, min, sec) {
       month += 1;
