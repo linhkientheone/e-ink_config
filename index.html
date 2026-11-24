@@ -742,10 +742,17 @@
             </div>
 
             <!-- Khung Preview Canvas 212x104 (Phóng to 2x để dễ nhìn trên Web) -->
-            <div class="flex flex-col items-center justify-center p-4 bg-slate-100 border border-dashed border-slate-300 rounded-xl space-y-2">
-              <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
-                <span>Màn hình xem trước thực tế (212 × 104 px - 1-bit Pixel-Exact)</span>
-                <span id="dash-current-layout-tag" class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px]">Tổng hợp</span>
+            <div class="flex flex-col items-center justify-center p-4 bg-slate-100 border border-dashed border-slate-300 rounded-xl space-y-2.5">
+              <div class="w-full flex flex-wrap items-center justify-between gap-2 px-1">
+                <div class="text-xs font-semibold text-slate-600 flex items-center gap-2">
+                  <span>Màn hình xem trước thực tế (212 × 104 px - 1-bit Pixel-Exact)</span>
+                  <span id="dash-current-layout-tag" class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px]">Tổng hợp</span>
+                </div>
+                <label class="inline-flex items-center gap-2 cursor-pointer bg-white hover:bg-slate-50 px-3 py-1 rounded-lg border border-slate-300 text-xs font-bold text-slate-800 shadow-sm select-none transition-all">
+                  <input type="checkbox" id="dash-invert-color" onchange="renderActiveDashboard()" class="w-3.5 h-3.5 accent-indigo-600 rounded cursor-pointer">
+                  <i class="fa fa-adjust text-indigo-600"></i>
+                  <span>Đảo ngược màu (Nền Đen)</span>
+                </label>
               </div>
               <canvas id="dash-canvas" width="212" height="104" class="border-1 border-slate-800 bg-white shadow-md" style="image-rendering: pixelated;"></canvas>
             </div>
@@ -2613,15 +2620,22 @@
             return s.trim() + '..';
         }
         flushToCanvas(ctx) {
+            const inv = !!document.getElementById('dash-invert-color')?.checked;
             const imgData = ctx.createImageData(this.w, this.h);
             const d = imgData.data;
             for (let i = 0, p = 0; i < this.buf.length; i++, p += 4) {
-                const v = this.buf[i] ? 255 : 0;
+                const bit = inv ? (1 - this.buf[i]) : this.buf[i];
+                const v = bit ? 255 : 0;
                 d[p] = d[p + 1] = d[p + 2] = v;
                 d[p + 3] = 255;
             }
             ctx.putImageData(imgData, 0, 0);
         }
+    }
+
+    function getDashSyncTimeStr() {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     }
 
     // --- VẼ MẪU 2: BENTO GRID 4 Ô + TIN NÓNG (100% PIXEL PILLOW) ---
@@ -2654,10 +2668,13 @@
         d.text(48, 25, whum, 'r9', 0);
         d.text(4, 34, `${wrange} • ${waqi}`, 'r9', 0);
 
-        // 2. Ô trên phải: VÀNG & XĂNG DẦU
+        // 2. Ô trên phải: VÀNG & XĂNG DẦU + Giờ cập nhật (C.Nhật HH:MM)
+        const syncStr = getDashSyncTimeStr();
         d.rect(82, 0, 211, 46, null, 0);
         d.rect(82, 0, 211, 13, 0, null);
-        d.text(86, 1, 'VÀNG & XĂNG DẦU', 'b9', 1);
+        d.text(85, 1, 'VÀNG & XĂNG', 'b9', 1);
+        const sw = d.textWidth(syncStr, 'r9');
+        d.text(208 - sw, 2, syncStr, 'r9', 1);
         d.text(86, 15, 'SJC: ' + sjc, 'b9', 0);
         d.text(86, 25, 'Nhẫn: ' + ring, 'r9', 0);
         d.text(86, 35, `A95: ${a95} | E5: ${e5}`, 'r9', 0);
@@ -2703,12 +2720,13 @@
 
         const d = new PilDraw1Bit(w, h, 1);
 
-        // Top Bar: Thời tiết bên trái, Giá xăng A95 & E5 dãn thoáng và căn sát lề phải
+        // Top Bar: Thời tiết bên trái, Giá xăng A95 & E5 + Giờ cập nhật (HH:MM) căn sát lề phải
+        const syncStr = getDashSyncTimeStr();
         d.rect(0, 0, 211, 15, 0, null);
         d.text(3, 2, `${cityVal} ${temp} ${wdesc}`, 'b9', 1);
-        const fuelRight = `A95: ${a95Short}  |  E5: ${e5}`;
+        const fuelRight = `A95:${a95Short} E5:${e5} • ${syncStr}`;
         const fw = d.textWidth(fuelRight, 'b9');
-        d.text(208 - fw, 2, fuelRight, 'b9', 1);
+        d.text(209 - fw, 2, fuelRight, 'b9', 1);
 
         // Table Header
         d.text(4, 18, 'CHỈ SỐ', 'b9', 0);
@@ -2755,10 +2773,13 @@
 
         const d = new PilDraw1Bit(w, h, 1);
 
-        // Top Header Bar (y: 0..14)
+        // Top Header Bar (y: 0..14) + Giờ cập nhật (HH:MM)
+        const syncStr = getDashSyncTimeStr();
         d.rect(0, 0, 211, 14, 0, null);
         d.text(4, 1, 'CRYPTO & FOREX', 'b10', 1);
-        d.text(134, 2, usdStr, 'b9', 1);
+        const rightHdr = `${usdStr} • ${syncStr}`;
+        const rhw = d.textWidth(rightHdr, 'r9');
+        d.text(209 - rhw, 2, rightHdr, 'r9', 1);
 
         // Left Box: BTC Spotlight + 24h Sparkline Chart (x: 0..100, y: 14..72)
         d.rect(0, 14, 100, 72, null, 0);
@@ -2825,9 +2846,12 @@
 
         const d = new PilDraw1Bit(w, h, 1);
 
-        // Header Bar (y: 0..15)
+        // Header Bar (y: 0..15) + Giờ cập nhật (HH:MM)
+        const syncStr = getDashSyncTimeStr();
         d.rect(0, 0, 211, 15, 0, null);
-        d.text(4, 2, leagueTitle, 'b9', 1);
+        d.text(4, 2, d.wrapText(leagueTitle, 'b9', 168), 'b9', 1);
+        const sw = d.textWidth(syncStr, 'r9');
+        d.text(208 - sw, 3, syncStr, 'r9', 1);
 
         // 4 Match rows (y = 19, step = 16)
         let y = 19;
@@ -2890,11 +2914,13 @@
 
         const d = new PilDraw1Bit(w, h, 1);
 
-        // Top Header Bar (y: 0..14)
+        // Top Header Bar (y: 0..14) + Giờ cập nhật (HH:MM)
+        const syncStr = getDashSyncTimeStr();
         d.rect(0, 0, 211, 14, 0, null);
-        d.text(4, 1, `THỜI TIẾT • ${cityName}`, 'b10', 1);
-        const uvw = d.textWidth(uvhum, 'r9');
-        d.text(208 - uvw, 2, uvhum, 'r9', 1);
+        d.text(4, 1, `THỜI TIẾT • ${cityName}`, 'b9', 1);
+        const rightHdr = `${uvhum} • ${syncStr}`;
+        const uvw = d.textWidth(rightHdr, 'r9');
+        d.text(209 - uvw, 2, rightHdr, 'r9', 1);
 
         // Left Panel: Current Weather & AQI Badge (x: 0..86, y: 15..76)
         d.line(86, 15, 86, 76, 0);
@@ -2965,9 +2991,12 @@
         const evDaysW = d.textWidth(evDays, 'b9');
         d.text(4 + Math.max(2, Math.floor((midX - 8 - evDaysW) / 2)), 83, d.wrapText(evDays, 'b9', midX - 10), 'b9', 1);
 
-        // Right Column: To-Do List + Progress Bar (x: 86..211)
+        // Right Column: To-Do List + Progress Bar (x: 86..211) + Giờ cập nhật (HH:MM)
+        const syncStr = getDashSyncTimeStr();
         d.rect(midX, 0, 211, 15, 0, null);
-        d.text(midX + 6, 2, 'VIỆC CẦN LÀM HÔM NAY', 'b9', 1);
+        d.text(midX + 5, 2, 'VIỆC HÔM NAY', 'b9', 1);
+        const sw = d.textWidth(syncStr, 'r9');
+        d.text(208 - sw, 3, syncStr, 'r9', 1);
 
         let y = 20;
         todos.forEach(t => {
