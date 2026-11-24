@@ -163,12 +163,21 @@
       </button>
 
       <!-- Tab 2: Xanh ngọc (Teal) -->
-      <button onclick="switchTab('tab2')" id="tab2-btn" class="flex-1 min-w-[150px] justify-center bg-gray-100 text-gray-600 hover:bg-teal-50 hover:text-teal-600 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+      <button onclick="switchTab('tab2')" id="tab2-btn" class="flex-1 min-w-[140px] justify-center bg-gray-100 text-gray-600 hover:bg-teal-50 hover:text-teal-600 px-4 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
         <i class="fa fa-image"></i> Truyền hình ảnh
       </button>
 
+      <!-- Tab 6: Live Dashboard (Thời tiết/Vàng/BTC, PC HUD, OMV NAS) -->
+      <button onclick="switchTab('tab6')" id="tab6-btn" class="flex-1 min-w-[145px] justify-center bg-gray-100 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 px-4 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+        <i class="fa fa-tachometer"></i>
+        <span class="flex flex-col text-center leading-tight">
+          <span>Live</span>
+          <span>Dashboard</span>
+        </span>
+      </button>
+
       <!-- Tab 3: Tím (Purple) -->
-      <button onclick="switchTab('tab3')" id="tab3-btn" class="flex-1 min-w-[150px] justify-center bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-600 px-5 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
+      <button onclick="switchTab('tab3')" id="tab3-btn" class="flex-1 min-w-[140px] justify-center bg-gray-100 text-gray-600 hover:bg-purple-50 hover:text-purple-600 px-4 py-3 rounded-xl flex items-center gap-2 font-semibold transition-all">
         <i class="fa fa-refresh"></i> Update Firmware
       </button>
 
@@ -678,6 +687,404 @@
             </div>
         </div>
 
+        <!-- TAB 6: LIVE DASHBOARD (100% PURE WEB BLE: TỔNG HỢP, CRYPTO & FOREX, BÓNG ĐÁ, THỜI TIẾT PRO, LỊCH ÂM & TO-DO) -->
+        <div id="tab6-content" class="tab-content hidden space-y-4">
+          <div class="p-5 bg-white rounded-xl shadow-sm border border-gray-100 space-y-5">
+
+            <!-- Header & Trạng thái Thiết bị Đã Chọn (Auto-Connect / Auto-Disconnect) -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b pb-3">
+              <div>
+                <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                  <i class="fa fa-tachometer text-indigo-600"></i> E-Ink Live Dashboard
+                </h3>
+                <p class="text-xs text-gray-500">Tự động kết nối BLE khi cần đẩy dữ liệu, gửi xong tự động ngắt kết nối ngay để tiết kiệm pin</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <span id="dash-target-device-badge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200">
+                  Thiết bị: Chưa chọn
+                </span>
+                <button type="button" onclick="selectBleDeviceForDashboard()" class="bg-primary hover:bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm transition-all">
+                  <i class="fa fa-bluetooth"></i> Chọn đồng hồ BLE
+                </button>
+                <div id="dash-auto-badge" class="hidden px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                  <span id="dash-auto-countdown">Auto-sync đang chạy</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5 Nút chọn chế độ Pure-Web Dashboard -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <button type="button" id="dash-mode-daily-btn" onclick="selectDashboardMode('daily')" class="p-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-800 font-semibold text-xs flex flex-col items-start gap-1 transition-all shadow-sm">
+                <div class="flex items-center gap-1.5 font-bold"><i class="fa fa-newspaper-o"></i> <span>Tổng hợp</span></div>
+                <div class="text-[10px] opacity-80 leading-tight text-left">Thời tiết, Vàng, BTC, VNI, Tin nóng</div>
+              </button>
+
+              <button type="button" id="dash-mode-crypto-btn" onclick="selectDashboardMode('crypto')" class="p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 font-semibold text-xs flex flex-col items-start gap-1 transition-all">
+                <div class="flex items-center gap-1.5 font-bold"><i class="fa fa-btc"></i> <span>Mẫu 1: Crypto</span></div>
+                <div class="text-[10px] opacity-80 leading-tight text-left">Chart 24h, ETH, SOL, Vàng, F&G</div>
+              </button>
+
+              <button type="button" id="dash-mode-football-btn" onclick="selectDashboardMode('football')" class="p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 font-semibold text-xs flex flex-col items-start gap-1 transition-all">
+                <div class="flex items-center gap-1.5 font-bold"><i class="fa fa-futbol-o"></i> <span>Mẫu 2: Bóng đá</span></div>
+                <div class="text-[10px] opacity-80 leading-tight text-left">Tỷ số & Lịch Ngoại Hạng Anh, C1</div>
+              </button>
+
+              <button type="button" id="dash-mode-weather-btn" onclick="selectDashboardMode('weather')" class="p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 font-semibold text-xs flex flex-col items-start gap-1 transition-all">
+                <div class="flex items-center gap-1.5 font-bold"><i class="fa fa-sun-o"></i> <span>Mẫu 3: Thời tiết</span></div>
+                <div class="text-[10px] opacity-80 leading-tight text-left">Dự báo theo giờ, Mưa, UV, PM2.5</div>
+              </button>
+
+              <button type="button" id="dash-mode-lunar-btn" onclick="selectDashboardMode('lunar')" class="p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 font-semibold text-xs flex flex-col items-start gap-1 transition-all">
+                <div class="flex items-center gap-1.5 font-bold"><i class="fa fa-calendar"></i> <span>Mẫu 4: Lịch & Việc</span></div>
+                <div class="text-[10px] opacity-80 leading-tight text-left">Lịch Âm, Đếm ngược Tết, To-Do</div>
+              </button>
+            </div>
+
+            <!-- Khung Preview Canvas 212x104 (Phóng to 2x để dễ nhìn trên Web) -->
+            <div class="flex flex-col items-center justify-center p-4 bg-slate-100 border border-dashed border-slate-300 rounded-xl space-y-2">
+              <div class="text-xs font-semibold text-slate-500 flex items-center gap-2">
+                <span>Màn hình xem trước thực tế (212 × 104 px - 1-bit Pixel-Exact)</span>
+                <span id="dash-current-layout-tag" class="bg-indigo-600 text-white px-2 py-0.5 rounded text-[10px]">Tổng hợp</span>
+              </div>
+              <canvas id="dash-canvas" width="212" height="104" class="border-2 border-slate-800 bg-white shadow-md" style="width: 424px; height: 208px; image-rendering: pixelated;"></canvas>
+            </div>
+
+            <!-- ================= PANEL 0: TỔNG HỢP (THỜI TIẾT, VÀNG, BTC, VNI, XĂNG, TIN HOT) ================= -->
+            <div id="dash-panel-daily" class="p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-700 uppercase">Bố cục hiển thị:</span>
+                  <select id="daily-layout-select" onchange="renderActiveDashboard()" class="text-xs px-2.5 py-1.5 border border-gray-300 rounded-lg bg-white font-semibold text-indigo-700">
+                    <option value="2" selected>Bento Grid 4 ô + Tin Hot</option>
+                    <option value="3">Bảng điện tử Tài chính + Tin Hot</option>
+                  </select>
+                </div>
+                <button type="button" id="btn-fetch-daily" onclick="fetchLiveDailyData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all">
+                  <i class="fa fa-cloud-download"></i> Cập nhật dữ liệu trực tuyến
+                </button>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Tỉnh/TP & Nhiệt độ</label>
+                  <div class="flex gap-1">
+                    <select id="d-city" onchange="onCityChange()" class="w-3/5 px-1.5 py-1 border rounded bg-white">
+                      <option value="HN|21.0285|105.8542">Hà Nội</option>
+                    </select>
+                    <input id="d-temp" type="text" value="18°C" oninput="renderActiveDashboard()" class="w-2/5 px-2 py-1 border rounded bg-white font-bold text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Thời tiết & Độ ẩm</label>
+                  <div class="flex gap-1">
+                    <input id="d-wdesc" type="text" value="Mây" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                    <input id="d-whum" type="text" value="63%" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Biên độ nhiệt & AQI</label>
+                  <div class="flex gap-1">
+                    <input id="d-wrange" type="text" value="15-20°" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                    <input id="d-waqi" type="text" value="AQI 56" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Xăng A95 & E5</label>
+                  <div class="flex gap-1">
+                    <input id="d-a95" type="text" value="19,100" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                    <input id="d-e5" type="text" value="18.6k" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Vàng SJC & Chênh lệch</label>
+                  <div class="flex gap-1">
+                    <input id="d-sjc" type="text" value="130.0 - 135.0 tr" oninput="renderActiveDashboard()" class="w-2/3 px-2 py-1 border rounded bg-white font-semibold">
+                    <input id="d-sjc-chg" type="text" value="CL 5.0tr" oninput="renderActiveDashboard()" class="w-1/3 px-1.5 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Vàng Nhẫn 9999</label>
+                  <input id="d-ring" type="text" value="129.4 - 134.2 tr" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Bitcoin (USD & Biến động)</label>
+                  <div class="flex gap-1">
+                    <input id="d-btc" type="text" value="60,006 USD" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white font-semibold">
+                    <input id="d-btc-chg" type="text" value="-3.0%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">VN-Index & Thay đổi</label>
+                  <div class="flex gap-1">
+                    <input id="d-vni" type="text" value="1,697.1" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white font-semibold">
+                    <input id="d-vni-chg" type="text" value="+8.4" oninput="renderActiveDashboard()" class="w-1/2 px-1.5 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Tin nóng #1 (VnExpress RSS)</label>
+                  <input id="d-news1" type="text" value="1. Giá vàng SJC và vàng nhẫn biến động mạnh phiên sáng" oninput="renderActiveDashboard()" class="w-full px-2.5 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Tin nóng #2 (VnExpress RSS)</label>
+                  <input id="d-news2" type="text" value="2. Khối ngoại quay lại mua ròng mạnh trên sàn HOSE" oninput="renderActiveDashboard()" class="w-full px-2.5 py-1 border rounded bg-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- ================= PANEL MẪU 1: CRYPTO, VÀNG QUỐC TẾ & FOREX TERMINAL ================= -->
+            <div id="dash-panel-crypto" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <span class="text-xs font-bold text-gray-700 uppercase">Nguồn: Binance API (BTC, ETH, SOL, BNB, PAXG) + ExchangeRate + Fear & Greed</span>
+                <button type="button" id="btn-fetch-crypto" onclick="fetchLiveCryptoForexData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa fa-refresh"></i> Cập nhật Giá & Chart 24h
+                </button>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">BTC/USDT & % 24h</label>
+                  <div class="flex gap-1">
+                    <input id="cr-btc-price" type="text" value="96,420$" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white font-bold">
+                    <input id="cr-btc-chg" type="text" value="+3.8%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white text-center">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Biên độ BTC 24h</label>
+                  <input id="cr-btc-range" type="text" value="24h: 92.1k - 97.0k" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Tỷ giá USD & EUR</label>
+                  <div class="flex gap-1">
+                    <input id="cr-usd" type="text" value="USD: 25,420đ" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white font-semibold">
+                    <input id="cr-eur" type="text" value="EUR: 26.8k" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Fear & Greed Index</label>
+                  <div class="flex gap-1">
+                    <input id="cr-fng-val" type="number" min="0" max="100" value="78" oninput="renderActiveDashboard()" class="w-2/5 px-2 py-1 border rounded bg-white font-bold text-center">
+                    <input id="cr-fng-lbl" type="text" value="78 THAM LAM" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">ETH (Giá & %)</label>
+                  <div class="flex gap-1">
+                    <input id="cr-eth-p" type="text" value="3,420$" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white">
+                    <input id="cr-eth-c" type="text" value="+4.2%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">SOL (Giá & %)</label>
+                  <div class="flex gap-1">
+                    <input id="cr-sol-p" type="text" value="238.5$" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white">
+                    <input id="cr-sol-c" type="text" value="+6.1%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">BNB (Giá & %)</label>
+                  <div class="flex gap-1">
+                    <input id="cr-bnb-p" type="text" value="652.0$" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white">
+                    <input id="cr-bnb-c" type="text" value="+1.4%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Vàng XAU/USD (PAXG)</label>
+                  <div class="flex gap-1">
+                    <input id="cr-xau-p" type="text" value="2,685$" oninput="renderActiveDashboard()" class="w-3/5 px-2 py-1 border rounded bg-white">
+                    <input id="cr-xau-c" type="text" value="+0.8%" oninput="renderActiveDashboard()" class="w-2/5 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ================= PANEL MẪU 2: LỊCH & TỶ SỐ BÓNG ĐÁ TRỰC TIẾP (ESPN API) ================= -->
+            <div id="dash-panel-football" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-700 uppercase">Giải đấu:</span>
+                  <select id="fb-league-select" onchange="fetchLiveFootballData()" class="text-xs px-2.5 py-1.5 border border-gray-300 rounded-lg bg-white font-semibold text-indigo-700">
+                    <option value="eng.1|BÓNG ĐÁ • NGOẠI HẠNG ANH">Ngoại Hạng Anh (Premier League)</option>
+                    <option value="uefa.champions|BÓNG ĐÁ • CHAMPIONS LEAGUE">Cúp C1 (UEFA Champions League)</option>
+                    <option value="esp.1|BÓNG ĐÁ • LA LIGA TÂY BAN NHA">La Liga (Tây Ban Nha)</option>
+                    <option value="ita.1|BÓNG ĐÁ • SERIE A Ý">Serie A (Ý)</option>
+                    <option value="ger.1|BÓNG ĐÁ • BUNDESLIGA ĐỨC">Bundesliga (Đức)</option>
+                  </select>
+                </div>
+                <button type="button" id="btn-fetch-football" onclick="fetchLiveFootballData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa fa-refresh"></i> Tải tỷ số trực tiếp (ESPN)
+                </button>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                <div class="grid grid-cols-12 gap-1 items-center bg-white p-1.5 rounded-lg border border-gray-200">
+                  <input id="fb-m1-st" type="text" value="FT" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center font-bold">
+                  <input id="fb-m1-home" type="text" value="Arsenal" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                  <input id="fb-m1-score" type="text" value="3 - 1" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center font-bold">
+                  <input id="fb-m1-away" type="text" value="Man United" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                </div>
+                <div class="grid grid-cols-12 gap-1 items-center bg-white p-1.5 rounded-lg border border-gray-200">
+                  <input id="fb-m2-st" type="text" value="78'" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center font-bold">
+                  <input id="fb-m2-home" type="text" value="Man City" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                  <input id="fb-m2-score" type="text" value="2 - 2" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center font-bold">
+                  <input id="fb-m2-away" type="text" value="Liverpool" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                </div>
+                <div class="grid grid-cols-12 gap-1 items-center bg-white p-1.5 rounded-lg border border-gray-200">
+                  <input id="fb-m3-st" type="text" value="02:00" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center">
+                  <input id="fb-m3-home" type="text" value="Real Madrid" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                  <input id="fb-m3-score" type="text" value="vs" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center">
+                  <input id="fb-m3-away" type="text" value="AC Milan" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                </div>
+                <div class="grid grid-cols-12 gap-1 items-center bg-white p-1.5 rounded-lg border border-gray-200">
+                  <input id="fb-m4-st" type="text" value="03:00" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center">
+                  <input id="fb-m4-home" type="text" value="Bayern" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                  <input id="fb-m4-score" type="text" value="vs" oninput="renderActiveDashboard()" class="col-span-2 px-1 py-1 border rounded bg-gray-50 text-center">
+                  <input id="fb-m4-away" type="text" value="PSG" oninput="renderActiveDashboard()" class="col-span-4 px-2 py-1 border rounded bg-white font-semibold min-w-0">
+                </div>
+              </div>
+              <div class="text-xs">
+                <label class="text-gray-500 font-medium block mb-0.5">Dòng thông tin BXH / Tin giải đấu dưới đáy</label>
+                <input id="fb-footer" type="text" value="TOP: 1.LIV (31đ) • 2.MCI (26đ) • 3.ARS (25đ)" oninput="renderActiveDashboard()" class="w-full px-2.5 py-1 border rounded bg-white font-semibold">
+              </div>
+            </div>
+
+            <!-- ================= PANEL MẪU 3: TRẠM THỜI TIẾT PRO THEO GIỜ & AQI/PM2.5 ================= -->
+            <div id="dash-panel-weather" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-700 uppercase">Địa điểm:</span>
+                  <select id="wp-city" onchange="fetchLiveWeatherProData()" class="text-xs px-2.5 py-1.5 border border-gray-300 rounded-lg bg-white font-semibold text-indigo-700">
+                    <option value="HÀ NỘI|21.0285|105.8542">Hà Nội</option>
+                  </select>
+                </div>
+                <button type="button" id="btn-fetch-wpro" onclick="fetchLiveWeatherProData()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa fa-cloud-download"></i> Cập nhật Dự báo Theo Giờ & AQI
+                </button>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Nhiệt độ & Trạng thái</label>
+                  <div class="flex gap-1">
+                    <input id="wp-temp" type="text" value="21°C" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white font-bold">
+                    <input id="wp-desc" type="text" value="Mát" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Biên độ & UV/Ẩm</label>
+                  <div class="flex gap-1">
+                    <input id="wp-range" type="text" value="15-24°" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                    <input id="wp-uvhum" type="text" value="UV:4 • 68%" oninput="renderActiveDashboard()" class="w-1/2 px-2 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Cảm giác & Khả năng mưa</label>
+                  <div class="flex gap-1">
+                    <input id="wp-feel" type="text" value="Cảm giác: 19°C" oninput="renderActiveDashboard()" class="w-1/2 px-1.5 py-1 border rounded bg-white">
+                    <input id="wp-rain" type="text" value="Mưa: 15% (0.2mm)" oninput="renderActiveDashboard()" class="w-1/2 px-1.5 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Chỉ số AQI</label>
+                  <input id="wp-aqi" type="text" value="AQI 112 • Kém" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white font-bold">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Mốc giờ #1 (Giờ|Nhiệt|%Mưa)</label>
+                  <input id="wp-h1" type="text" value="12h|24°|10%" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Mốc giờ #2 (Giờ|Nhiệt|%Mưa)</label>
+                  <input id="wp-h2" type="text" value="15h|25°|5%" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Mốc giờ #3 (Giờ|Nhiệt|%Mưa)</label>
+                  <input id="wp-h3" type="text" value="18h|21°|20%" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Mốc giờ #4 (Giờ|Nhiệt|%Mưa)</label>
+                  <input id="wp-h4" type="text" value="21h|18°|60%" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <input id="wp-days" type="text" value="Mai: 17-24° Mây | T6: 14-19° Mưa | T7: 13-18°" oninput="renderActiveDashboard()" class="w-full px-2.5 py-1 border rounded bg-white font-semibold">
+                <input id="wp-pm25" type="text" value="PM2.5: 42 µg/m³ • Khuyến cáo đeo khẩu trang" oninput="renderActiveDashboard()" class="w-full px-2.5 py-1 border rounded bg-white">
+              </div>
+            </div>
+
+            <!-- ================= PANEL MẪU 4: LỊCH VẠN NIÊN ÂM DƯƠNG + ĐẾM NGƯỢC TẾT + TO-DO LIST ================= -->
+            <div id="dash-panel-lunar" class="hidden p-4 bg-gray-50 border border-gray-200 rounded-xl space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2.5">
+                <span class="text-xs font-bold text-gray-700 uppercase">Tự động tính Âm Lịch hôm nay & Lưu danh sách việc cần làm trên trình duyệt</span>
+                <button type="button" onclick="refreshLunarCalendarToday()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa fa-calendar-check-o"></i> Đồng bộ ngày hôm nay
+                </button>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Thứ & Tháng Dương</label>
+                  <input id="ln-header" type="text" value="THỨ TƯ • T11" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white font-bold">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Ngày Dương & Ngày Âm</label>
+                  <div class="flex gap-1">
+                    <input id="ln-day" type="text" value="25" oninput="renderActiveDashboard()" class="w-1/3 px-2 py-1 border rounded bg-white font-bold text-center">
+                    <input id="ln-lunar" type="text" value="25/10 Âm lịch" oninput="renderActiveDashboard()" class="w-2/3 px-2 py-1 border rounded bg-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Sự kiện đếm ngược</label>
+                  <input id="ln-ev-name" type="text" value="TẾT Nguyên Đán" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white font-semibold">
+                </div>
+                <div>
+                  <label class="text-gray-500 font-medium block mb-0.5">Số ngày còn lại</label>
+                  <input id="ln-ev-days" type="text" value="Còn 65 ngày" oninput="renderActiveDashboard()" class="w-full px-2 py-1 border rounded bg-white font-bold">
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div class="flex items-center gap-2 bg-white p-1.5 rounded border">
+                  <input type="checkbox" id="td-chk-1" checked onchange="saveAndRenderTodos()" class="w-4 h-4 accent-indigo-600">
+                  <input type="text" id="td-txt-1" value="Gửi báo giá dự án E-Ink" oninput="saveAndRenderTodos()" class="flex-1 outline-none">
+                </div>
+                <div class="flex items-center gap-2 bg-white p-1.5 rounded border">
+                  <input type="checkbox" id="td-chk-2" onchange="saveAndRenderTodos()" class="w-4 h-4 accent-indigo-600">
+                  <input type="text" id="td-txt-2" value="14:00 Họp team kỹ thuật" oninput="saveAndRenderTodos()" class="flex-1 outline-none">
+                </div>
+                <div class="flex items-center gap-2 bg-white p-1.5 rounded border">
+                  <input type="checkbox" id="td-chk-3" onchange="saveAndRenderTodos()" class="w-4 h-4 accent-indigo-600">
+                  <input type="text" id="td-txt-3" value="Test lô màn hình 2.13 inch" oninput="saveAndRenderTodos()" class="flex-1 outline-none">
+                </div>
+                <div class="flex items-center gap-2 bg-white p-1.5 rounded border">
+                  <input type="checkbox" id="td-chk-4" onchange="saveAndRenderTodos()" class="w-4 h-4 accent-indigo-600">
+                  <input type="text" id="td-txt-4" value="Thanh toán hóa đơn Server" oninput="saveAndRenderTodos()" class="flex-1 outline-none">
+                </div>
+              </div>
+            </div>
+
+            <!-- Khu vực Điều khiển Gửi BLE (Auto-Connect -> Push -> Auto-Disconnect) -->
+            <div class="p-4 bg-indigo-50/60 border border-indigo-200 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-3">
+                <label class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                  <i class="fa fa-clock-o"></i> Chu kỳ tự động (Kết nối → Đẩy → Ngắt):
+                </label>
+                <select id="dash-interval-select" class="text-xs px-3 py-2 border border-indigo-300 rounded-lg bg-white font-semibold text-gray-800">
+                  <option value="5">Mỗi 5 phút</option>
+                  <option value="15" selected>Mỗi 15 phút</option>
+                  <option value="1">Mỗi 1 phút (Test nhanh)</option>
+                  <option value="30">Mỗi 30 phút</option>
+                </select>
+                <button type="button" id="dash-auto-btn" onclick="toggleDashboardAutoSync()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all">
+                  <i class="fa fa-play"></i> Bật tự động cập nhật
+                </button>
+              </div>
+
+              <button type="button" id="dash-push-now-btn" onclick="pushDashboardNow()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 shadow-md transition-all">
+                <i class="fa fa-paper-plane"></i> Kết nối, Đẩy & Ngắt ngay
+              </button>
+            </div>
+
+          </div>
+        </div>
+
       <!-- 日志终端区域 -->
       <div class="space-y-2">
         <div class="flex justify-between items-center">
@@ -702,6 +1109,7 @@
   </div>
 
   <script src="https://cdn.sheetjs.com/crc-32-latest/package/crc32.js"></script>
+  <script src="pixel_fonts.js"></script>
 
   <script>
 
@@ -817,8 +1225,8 @@
     // ================================================================
     const LUNAR_INFO = [
       0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60,  // 2020-2024
-      0x0a6e6, 0x0a4f0, 0x05260, 0x0ea65, 0x0d520,  // 2025-2029
-      0x0daa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0,  // 2030-2034
+      0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,  // 2025-2029
+      0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0,  // 2030-2034
       0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,  // 2035-2039
       0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577,  // 2040-2044
       0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,  // 2045-2049
@@ -832,50 +1240,42 @@
       return d + Math.floor((153*mm+2)/5) + 365*yy +
              Math.floor(yy/4) - Math.floor(yy/100) + Math.floor(yy/400) - 32045;
     }
+    // Khớp 100% với hàm get_lunar_mdays() trong firmware user_custs1_impl.c:
+    // - Bit 15..4 (12 bits): tháng 1 (0x8000 >> 0) đến tháng 12 (0x8000 >> 11)
+    // - Bit 3..0 (4 bits): tháng nhuận (0 = không nhuận, 1..12 = tháng nhuận)
+    // - Bit 16 (0x10000): tháng nhuận có 30 ngày hay 29 ngày
     function _lmDays(ly, lm) {
-      return (LUNAR_INFO[ly] & (0x10000 >> lm)) ? 30 : 29;
+      const info = LUNAR_INFO[ly];
+      return (info & (0x8000 >> (lm - 1))) ? 30 : 29;
     }
     function _leapDays(ly) {
       const info = LUNAR_INFO[ly];
       return (info & 0xf) ? ((info & 0x10000) ? 30 : 29) : 0;
     }
-    function _lYearDays(ly) {
-      let sum = 0;
-      for (let m = 1; m <= 12; m++) sum += _lmDays(ly, m);
-      sum += _leapDays(ly);
-      return sum;
-    }
     // solarToLunar(year, month, day) -- month is 1-based
     // Returns { lyear: offset_from_2020, lmonth: 1-12, lday: 1-30, isLeap: bool }
     function solarToLunar(sy, sm, sd) {
-      let off = _toJD(sy, sm, sd) - LUNAR_BASE_JD;
-      if (off < 0) return null;
-      let ly = 0;
+      let off = _toJD(sy, sm, sd) - LUNAR_BASE_JD, ly = 0;
       while (ly < LUNAR_INFO.length) {
-        const yd = _lYearDays(ly);
+        const leap = LUNAR_INFO[ly] & 0xf;
+        let yd = 0;
+        for (let m=1; m<=12; m++) yd += _lmDays(ly, m);
+        if (leap) yd += _leapDays(ly);
         if (off < yd) break;
-        off -= yd;
-        ly++;
+        off -= yd; ly++;
       }
-      if (ly >= LUNAR_INFO.length) return null;
-
       const leapM = LUNAR_INFO[ly] & 0xf;
-      for (let m = 1; m <= 12; m++) {
+      for (let m=1; m<=12; m++) {
         const md = _lmDays(ly, m);
-        if (off < md) {
-          return { lyear: ly, lmonth: m, lday: off + 1, isLeap: false };
-        }
+        if (off < md) return { lyear:ly, lmonth:m, lday:off+1, isLeap:false };
         off -= md;
-
         if (leapM > 0 && m === leapM) {
           const ld = _leapDays(ly);
-          if (off < ld) {
-            return { lyear: ly, lmonth: m, lday: off + 1, isLeap: true };
-          }
+          if (off < ld) return { lyear:ly, lmonth:leapM, lday:off+1, isLeap:true };
           off -= ld;
         }
       }
-      return { lyear: ly, lmonth: 12, lday: off + 1, isLeap: false };
+      return { lyear:ly, lmonth:12, lday:off+1, isLeap:false };
     }
     function formatTime(year, month, mday, hour, min, sec) {
       month += 1;
@@ -933,6 +1333,9 @@
           filters: [{ namePrefix: "ONE-" }],
           optionalServices: [ SVC_UUID ]
         });
+        savedBleDevice = device;
+        const badge = document.getElementById('dash-target-device-badge');
+        if (badge) badge.textContent = `Thiết bị: ${device.name}`;
         console.log('Tên thiết bị:', device.name);
         document.getElementById('device_name').textContent = device.name;
         device.ongattserverdisconnected = onDisconnect;
@@ -1391,9 +1794,9 @@
       });
 
       // Reset style tất cả các nút tab về trạng thái không active (màu xám)
-      ['tab1-btn', 'tab2-btn', 'tab3-btn', 'tab4-btn'].forEach(btnId => {
+      ['tab1-btn', 'tab2-btn', 'tab3-btn', 'tab4-btn', 'tab6-btn'].forEach(btnId => {
           const btn = document.getElementById(btnId);
-          btn.className = "flex-1 min-w-[150px] justify-center bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-300 transition-all";
+          if (btn) btn.className = "flex-1 min-w-[140px] justify-center bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium hover:bg-gray-300 transition-all";
       });
 
       // Hiện nội dung tab được chọn
@@ -1401,7 +1804,10 @@
 
       // Làm nổi bật nút được click (dùng màu primary hoặc accent)
       const activeBtn = document.getElementById(tabId + '-btn');
-      activeBtn.className = "flex-1 min-w-[150px] justify-center bg-amber-500 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-md transition-all";
+      activeBtn.className = "flex-1 min-w-[140px] justify-center bg-amber-500 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium shadow-md transition-all";
+      if (tabId === 'tab6' && typeof renderActiveDashboard === 'function') {
+          renderActiveDashboard();
+      }
   }
 
     // Hàm cập nhật kích thước canvas dựa trên dropdown ở Tab 2
@@ -1760,11 +2166,1401 @@
         applyThreshold();
     }
 
-    // Chạy khởi tạo kích thước canvas lần đầu khi load trang
+    // Helper: Khử răng cưa thông minh (Adaptive 1-bit Binarize)
+    // Phân biệt vùng nền Đen chữ Trắng (cần ngưỡng thấp ~105 để chữ trắng không bị bóp nghẹt/dính chữ)
+    // và vùng nền Trắng chữ Đen (cần ngưỡng cao ~192 để nét mảnh không bị đứt nét như số 8, chữ ảnh)
+    function binarizeCanvas(ctx, w, h, defaultThreshold = 190) {
+        const imgData = ctx.getImageData(0, 0, w, h);
+        const d = imgData.data;
+
+        // Passo 1: Tính độ sáng (luminance) từng pixel
+        const lum = new Float32Array(w * h);
+        for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+            lum[p] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        }
+
+        // Bước 2: Xác định mỗi pixel thuộc vùng Nền Trắng hay Nền Đen (dựa vào trung bình cửa sổ lân cận 7x5)
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let sum = 0, cnt = 0;
+                for (let dy = -2; dy <= 2; dy++) {
+                    const ny = y + dy;
+                    if (ny < 0 || ny >= h) continue;
+                    for (let dx = -3; dx <= 3; dx++) {
+                        const nx = x + dx;
+                        if (nx < 0 || nx >= w) continue;
+                        sum += lum[ny * w + nx];
+                        cnt++;
+                    }
+                }
+                const localAvg = sum / cnt;
+                const p = y * w + x;
+                // Nếu vùng xung quanh tối (localAvg < 115) -> đây là hộp nền đen chữ trắng -> ngưỡng 105
+                // Nếu vùng xung quanh sáng -> đây là nền trắng chữ đen -> ngưỡng 192 để giữ đủ nét mảnh
+                const thresh = (localAvg < 115) ? 105 : 192;
+                const v = (lum[p] >= thresh) ? 255 : 0;
+                const idx = p * 4;
+                d[idx] = d[idx + 1] = d[idx + 2] = v;
+                d[idx + 3] = 255;
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+    }
+
+    // 7. Vẽ mẫu OMV NAS + Immich Docker Dashboard (212x104)
+    function drawOmvDashboardDemo() {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        renderOmvStatsCanvas(ctx, canvas.width, canvas.height);
+        if (typeof addLog === 'function') addLog('Đã tạo mẫu OMV + Immich Dashboard trên Canvas.');
+    }
+
+    // 8. Vẽ mẫu Claude Pro Quota + Lịch làm việc hôm nay (212x104)
+    function drawClaudeDashboardDemo() {
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        const now = new Date();
+        const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const dateStr = `T${now.getDay() === 0 ? 'CN' : now.getDay() + 1} ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, w, h);
+
+        // Header
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 10px Tahoma, Arial, sans-serif';
+        ctx.fillText(dateStr, 4, 12);
+        // DEMO badge
+        ctx.fillRect(48, 2, 32, 12);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 8px Tahoma, Arial, sans-serif';
+        ctx.fillText('SYNC', 53, 11);
+
+        ctx.fillStyle = '#000000';
+        ctx.font = '9px Tahoma, Arial, sans-serif';
+        ctx.fillText(`Quota ${timeStr}`, w - 58, 11);
+        ctx.fillRect(0, 16, w, 1);
+
+        const midX = 88;
+        ctx.fillRect(midX, 17, 1, h - 17);
+
+        // Cột trái: Claude Pro Quota
+        ctx.font = 'bold 10px Tahoma, Arial, sans-serif';
+        ctx.fillText('* Claude Pro', 4, 28);
+
+        // 5 giờ
+        ctx.font = '9px Tahoma, Arial, sans-serif';
+        ctx.fillText('5 giờ', 4, 42);
+        ctx.font = 'bold 10px Tahoma, Arial, sans-serif';
+        ctx.fillText('27%', midX - 28, 42);
+        ctx.strokeRect(4.5, 45.5, midX - 10, 6);
+        ctx.fillRect(5, 46, Math.round((midX - 11) * 0.27), 5);
+        ctx.font = '8px Tahoma, Arial, sans-serif';
+        ctx.fillText('còn 73%  • 13:17', 4, 61);
+
+        // Tuần
+        ctx.font = '9px Tahoma, Arial, sans-serif';
+        ctx.fillText('Tuần', 4, 75);
+        ctx.font = 'bold 10px Tahoma, Arial, sans-serif';
+        ctx.fillText('61%', midX - 28, 75);
+        ctx.strokeRect(4.5, 78.5, midX - 10, 6);
+        ctx.fillRect(5, 79, Math.round((midX - 11) * 0.61), 5);
+        ctx.font = '8px Tahoma, Arial, sans-serif';
+        ctx.fillText('còn 39%  • T4 15:05', 4, 94);
+
+        // Cột phải: Lịch làm việc HÔM NAY
+        const rx = midX + 4;
+        ctx.font = 'bold 9px Tahoma, Arial, sans-serif';
+        ctx.fillText('HÔM NAY', rx, 28);
+        ctx.font = '8px Tahoma, Arial, sans-serif';
+        ctx.fillText('đã xong 1', w - 42, 28);
+
+        ctx.font = 'bold 9px Tahoma, Arial, sans-serif';
+        ctx.fillText('> 10:45 Họp giao ban...', rx, 42);
+        ctx.font = '9px Tahoma, Arial, sans-serif';
+        ctx.fillText('Cả ngày Nộp hồ sơ BHXH', rx, 56);
+        ctx.fillText('13:30 Check NAS & Immich', rx, 70);
+        ctx.fillText('15:00 Review tính năng...', rx, 84);
+        ctx.font = 'bold 8px Tahoma, Arial, sans-serif';
+        ctx.fillText('+2 mục nữa', rx, 96);
+
+        ctx.strokeRect(0.5, 0.5, w - 1, h - 1);
+        binarizeCanvas(ctx, w, h, 160);
+        if (typeof addLog === 'function') addLog('Đã tạo mẫu Claude Pro + Lịch làm việc trên Canvas.');
+    }
+
+    // Chạy khởi tạo kích thước canvas lần đầu khi load trang (không gọi mạng lúc mới mở trang để trang load tức thì)
     window.addEventListener('DOMContentLoaded', () => {
         updateCanvasSize();
         disableWatchFaceButtons();
+        initVietnamProvincesAndAutoLocate();
     });
+
+    // =========================================================================
+    // DANH SÁCH 34 TỈNH/THÀNH VIỆT NAM & TỰ ĐỘNG ĐỊNH VỊ VỊ TRÍ NGƯỜI DÙNG
+    // =========================================================================
+    const VN_PROVINCES_34 = [
+        { code: 'HNI', name: 'Hà Nội',          lat: 21.0285, lon: 105.8542 },
+        { code: 'HCM', name: 'TP. Hồ Chí Minh', lat: 10.7769, lon: 106.7009 },
+        { code: 'HPH', name: 'Hải Phòng',       lat: 20.8449, lon: 106.6881 },
+        { code: 'ĐNA', name: 'Đà Nẵng',         lat: 16.0544, lon: 108.2022 },
+        { code: 'CTH', name: 'Cần Thơ',         lat: 10.0452, lon: 105.7469 },
+        { code: 'HUẾ', name: 'TP. Huế',         lat: 16.4637, lon: 107.5909 },
+        { code: 'QNI', name: 'Quảng Ninh',      lat: 20.9599, lon: 107.0425 },
+        { code: 'BNI', name: 'Bắc Ninh',        lat: 21.1861, lon: 106.0763 },
+        { code: 'HYE', name: 'Hưng Yên',        lat: 20.6464, lon: 106.0511 },
+        { code: 'NBI', name: 'Ninh Bình',       lat: 20.2506, lon: 105.9745 },
+        { code: 'PTH', name: 'Phú Thọ',         lat: 21.3227, lon: 105.4019 },
+        { code: 'TNG', name: 'Thái Nguyên',     lat: 21.5942, lon: 105.8482 },
+        { code: 'LSO', name: 'Lạng Sơn',        lat: 21.8537, lon: 106.7615 },
+        { code: 'CBA', name: 'Cao Bằng',        lat: 22.6663, lon: 106.2522 },
+        { code: 'TQU', name: 'Tuyên Quang',     lat: 21.8236, lon: 105.2142 },
+        { code: 'LCA', name: 'Lào Cai',         lat: 22.4856, lon: 103.9707 },
+        { code: 'SLA', name: 'Sơn La',          lat: 21.3256, lon: 103.9188 },
+        { code: 'ĐBI', name: 'Điện Biên',       lat: 21.3860, lon: 103.0169 },
+        { code: 'LCH', name: 'Lai Châu',        lat: 22.3864, lon: 103.4703 },
+        { code: 'THO', name: 'Thanh Hóa',       lat: 19.8067, lon: 105.7852 },
+        { code: 'NAN', name: 'Nghệ An',         lat: 18.6796, lon: 105.6813 },
+        { code: 'HTI', name: 'Hà Tĩnh',         lat: 18.3559, lon: 105.8877 },
+        { code: 'QTR', name: 'Quảng Trị',       lat: 17.4689, lon: 106.6223 },
+        { code: 'QNG', name: 'Quảng Ngãi',      lat: 15.1214, lon: 108.8044 },
+        { code: 'GLA', name: 'Gia Lai',         lat: 13.7820, lon: 109.2197 },
+        { code: 'ĐLA', name: 'Đắk Lắk',         lat: 12.6667, lon: 108.0500 },
+        { code: 'KHO', name: 'Khánh Hòa',       lat: 12.2388, lon: 109.1967 },
+        { code: 'LĐO', name: 'Lâm Đồng',        lat: 11.9404, lon: 108.4583 },
+        { code: 'ĐNI', name: 'Đồng Nai',        lat: 10.9574, lon: 106.8426 },
+        { code: 'TNI', name: 'Tây Ninh',        lat: 11.3352, lon: 106.1099 },
+        { code: 'ĐTH', name: 'Đồng Tháp',       lat: 10.4598, lon: 105.6329 },
+        { code: 'VLO', name: 'Vĩnh Long',       lat: 10.2397, lon: 105.9572 },
+        { code: 'AGI', name: 'An Giang',        lat: 10.3864, lon: 105.4352 },
+        { code: 'CMA', name: 'Cà Mau',          lat: 9.1769,  lon: 105.1524 }
+    ];
+
+    function findNearestProvince(lat, lon) {
+        let best = VN_PROVINCES_34[0];
+        let minDist = Infinity;
+        for (const p of VN_PROVINCES_34) {
+            const d = (p.lat - lat) ** 2 + (p.lon - lon) ** 2;
+            if (d < minDist) {
+                minDist = d;
+                best = p;
+            }
+        }
+        return best;
+    }
+
+    function applyProvinceSelection(prov, triggerFetch = false) {
+        const dCity = document.getElementById('d-city');
+        const wpCity = document.getElementById('wp-city');
+        if (dCity) dCity.value = `${prov.code}|${prov.lat}|${prov.lon}`;
+        if (wpCity) wpCity.value = `${prov.name.toUpperCase()}|${prov.lat}|${prov.lon}`;
+        try { localStorage.setItem('eink_selected_prov_code', prov.code); } catch (e) {}
+        if (triggerFetch) {
+            if (currentDashMode === 'daily') fetchLiveDailyData();
+            else if (currentDashMode === 'weather') fetchLiveWeatherProData();
+            else renderActiveDashboard();
+        } else {
+            renderActiveDashboard();
+        }
+    }
+
+    function initVietnamProvincesAndAutoLocate() {
+        const dCity = document.getElementById('d-city');
+        const wpCity = document.getElementById('wp-city');
+        if (dCity) {
+            dCity.innerHTML = VN_PROVINCES_34.map(p =>
+                `<option value="${p.code}|${p.lat}|${p.lon}">${p.name}</option>`
+            ).join('');
+        }
+        if (wpCity) {
+            wpCity.innerHTML = VN_PROVINCES_34.map(p =>
+                `<option value="${p.name.toUpperCase()}|${p.lat}|${p.lon}">${p.name}</option>`
+            ).join('');
+        }
+        // Mặc định chọn Hà Nội (phần tử đầu tiên trong VN_PROVINCES_34), không hỏi quyền vị trí
+        applyProvinceSelection(VN_PROVINCES_34[0], false);
+    }
+
+    // =========================================================================
+    // LIVE DASHBOARD ENGINE (100% PURE WEB BLE + AUTO-CONNECT / AUTO-DISCONNECT)
+    // =========================================================================
+    let currentDashMode = 'daily'; // 'daily' | 'crypto' | 'football' | 'weather' | 'lunar'
+    let dailyAutoToggleIdx = 0;    // Luân phiên 0 -> Bento Grid, 1 -> Bảng Tài Chính
+    let dashAutoTimer = null;
+    let savedBleDevice = null;     // Lưu đối tượng BluetoothDevice đã chọn lần đầu để tự kết nối lại rồi ngắt
+    let btcSparklinePoints = [92100, 92800, 91900, 93400, 93100, 94600, 94100, 95500, 96420];
+
+    async function selectBleDeviceForDashboard() {
+        const SVC_UUID = '0000ff00-0000-1000-8000-00805f9b34fb';
+        try {
+            const dev = await navigator.bluetooth.requestDevice({
+                filters: [{ namePrefix: "ONE-" }],
+                optionalServices: [SVC_UUID]
+            });
+            savedBleDevice = dev;
+            const badge = document.getElementById('dash-target-device-badge');
+            if (badge) {
+                badge.textContent = `Đã chọn: ${dev.name}`;
+                badge.className = "px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold border border-indigo-300";
+            }
+            console.log(`Đã chọn đồng hồ mục tiêu cho Dashboard: ${dev.name} (Sẽ tự động kết nối khi đẩy ảnh và ngắt kết nối ngay sau khi gửi xong).`);
+            return dev;
+        } catch (err) {
+            console.log('Hủy chọn thiết bị BLE:', err.message);
+            return null;
+        }
+    }
+
+    function selectDashboardMode(mode) {
+        currentDashMode = mode;
+        const modes = ['daily', 'crypto', 'football', 'weather', 'lunar'];
+        modes.forEach(m => {
+            const panel = document.getElementById('dash-panel-' + m);
+            const btn = document.getElementById('dash-mode-' + m + '-btn');
+            if (panel) panel.classList.toggle('hidden', m !== mode);
+            if (btn) {
+                btn.className = (m === mode)
+                    ? "p-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-800 font-semibold text-xs flex flex-col items-start gap-1 transition-all shadow-sm"
+                    : "p-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 font-semibold text-xs flex flex-col items-start gap-1 transition-all";
+            }
+        });
+        renderActiveDashboard();
+        if (mode === 'crypto') fetchLiveCryptoForexData();
+        else if (mode === 'football') fetchLiveFootballData();
+        else if (mode === 'weather') fetchLiveWeatherProData();
+        else if (mode === 'lunar') refreshLunarCalendarToday();
+    }
+
+    function getActiveDailyLayoutNumber() {
+        const sel = document.getElementById('daily-layout-select');
+        return (sel && sel.value === '3') ? 3 : 2;
+    }
+
+    function renderActiveDashboard() {
+        const dCanvas = document.getElementById('dash-canvas');
+        if (!dCanvas) return;
+        const ctx = dCanvas.getContext('2d');
+        const tag = document.getElementById('dash-current-layout-tag');
+
+        if (currentDashMode === 'daily') {
+            const layoutNum = getActiveDailyLayoutNumber();
+            if (tag) tag.textContent = (layoutNum === 2) ? 'Tổng hợp (Bento Grid)' : 'Tổng hợp (Bảng Tài Chính)';
+            if (layoutNum === 3) renderDailyLayout3Canvas(ctx, 212, 104);
+            else renderDailyLayout2Canvas(ctx, 212, 104);
+        } else if (currentDashMode === 'crypto') {
+            if (tag) tag.textContent = 'Mẫu 1: Crypto & Forex';
+            renderCryptoForexCanvas(ctx, 212, 104);
+        } else if (currentDashMode === 'football') {
+            if (tag) tag.textContent = 'Mẫu 2: Bóng Đá Live';
+            renderFootballCanvas(ctx, 212, 104);
+        } else if (currentDashMode === 'weather') {
+            if (tag) tag.textContent = 'Mẫu 3: Thời Tiết Pro';
+            renderWeatherProCanvas(ctx, 212, 104);
+        } else if (currentDashMode === 'lunar') {
+            if (tag) tag.textContent = 'Mẫu 4: Lịch Âm & Việc';
+            renderLunarTodoCanvas(ctx, 212, 104);
+        }
+    }
+
+    // =========================================================================
+    // PILLOW 1-BIT PIXEL-EXACT ENGINE (GIỐNG BẢN PYTHON 100% TỪNG PIXEL)
+    // =========================================================================
+    class PilDraw1Bit {
+        constructor(w = 212, h = 104, bg = 1) {
+            this.w = w;
+            this.h = h;
+            this.buf = new Uint8Array(w * h);
+            this.buf.fill(bg ? 1 : 0);
+        }
+        setPixel(x, y, c) {
+            x = Math.round(x);
+            y = Math.round(y);
+            if (x >= 0 && x < this.w && y >= 0 && y < this.h) {
+                this.buf[y * this.w + x] = c ? 1 : 0;
+            }
+        }
+        line(x0, y0, x1, y1, c = 0) {
+            if (!Number.isFinite(x0) || !Number.isFinite(y0) || !Number.isFinite(x1) || !Number.isFinite(y1)) return;
+            x0 = Math.round(x0); y0 = Math.round(y0);
+            x1 = Math.round(x1); y1 = Math.round(y1);
+            const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            let err = dx + dy;
+            let guard = 600;
+            while (guard-- > 0) {
+                this.setPixel(x0, y0, c);
+                if (x0 === x1 && y0 === y1) break;
+                const e2 = 2 * err;
+                if (e2 >= dy) { err += dy; x0 += sx; }
+                if (e2 <= dx) { err += dx; y0 += sy; }
+            }
+        }
+        polyline(pts, c = 0) {
+            for (let i = 0; i < pts.length - 1; i++) {
+                this.line(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], c);
+            }
+        }
+        rect(x0, y0, x1, y1, fill = null, outline = null) {
+            x0 = Math.round(x0); y0 = Math.round(y0);
+            x1 = Math.round(x1); y1 = Math.round(y1);
+            if (fill !== null) {
+                for (let y = y0; y <= y1; y++) {
+                    for (let x = x0; x <= x1; x++) this.setPixel(x, y, fill);
+                }
+            }
+            if (outline !== null) {
+                this.line(x0, y0, x1, y0, outline);
+                this.line(x0, y1, x1, y1, outline);
+                this.line(x0, y0, x0, y1, outline);
+                this.line(x1, y0, x1, y1, outline);
+            }
+        }
+        progressBar(x, y, w, h, pct) {
+            pct = Math.max(0, Math.min(100, pct));
+            this.rect(x, y, x + w, y + h, 1, 0);
+            const fw = Math.round(((w - 2) * pct) / 100);
+            if (fw > 0) this.rect(x + 1, y + 1, x + 1 + fw, y + h - 1, 0, null);
+        }
+        circle(cx, cy, r, c = 0) {
+            this.arc(cx, cy, r, 0, 360, c);
+        }
+        arc(cx, cy, r, startDeg, endDeg, c = 0) {
+            const steps = Math.max(36, Math.round(r * 6));
+            const sRad = (startDeg * Math.PI) / 180;
+            const eRad = (endDeg * Math.PI) / 180;
+            let prevX = null, prevY = null;
+            for (let i = 0; i <= steps; i++) {
+                const a = sRad + ((eRad - sRad) * i) / steps;
+                const px = Math.round(cx + r * Math.cos(a));
+                const py = Math.round(cy + r * Math.sin(a));
+                if (prevX !== null) this.line(prevX, prevY, px, py, c);
+                else this.setPixel(px, py, c);
+                prevX = px; prevY = py;
+            }
+        }
+        textWidth(str, fontKey) {
+            const f = (window.PIL_FONTS && window.PIL_FONTS[fontKey]) || null;
+            if (!f) return str.length * 6;
+            let w = 0;
+            for (const ch of String(str)) {
+                const g = f[ch] || f['?'];
+                if (g) w += g[0];
+            }
+            return w;
+        }
+        textBBox(str, fontKey) {
+            const f = (window.PIL_FONTS && window.PIL_FONTS[fontKey]) || null;
+            if (!f) return [0, 0, str.length * 6, 10];
+            let cx = 0, minX = 9999, minY = 9999, maxX = 0, maxY = 0;
+            for (const ch of String(str)) {
+                const g = f[ch] || f['?'];
+                if (!g) continue;
+                const [adv, ox, oy, mw, mh] = g;
+                if (mw > 0 && mh > 0) {
+                    minX = Math.min(minX, cx + ox);
+                    minY = Math.min(minY, oy);
+                    maxX = Math.max(maxX, cx + ox + mw);
+                    maxY = Math.max(maxY, oy + mh);
+                }
+                cx += adv;
+            }
+            if (minX === 9999) return [0, 0, cx, 10];
+            return [minX, minY, Math.max(cx, maxX), maxY];
+        }
+        text(x, y, str, fontKey, color = 0) {
+            const f = (window.PIL_FONTS && window.PIL_FONTS[fontKey]) || null;
+            if (!f) return;
+            let cx = Math.round(x);
+            const cy = Math.round(y);
+            for (const ch of String(str)) {
+                const g = f[ch] || f['?'];
+                if (!g) continue;
+                const [adv, ox, oy, mw, mh, b64] = g;
+                if (mw > 0 && mh > 0 && b64) {
+                    const bin = atob(b64);
+                    let byteIdx = 0;
+                    for (let gy = 0; gy < mh; gy++) {
+                        let bVal = 0, bitPos = 0;
+                        for (let gx = 0; gx < mw; gx++) {
+                            if (bitPos === 0) {
+                                bVal = bin.charCodeAt(byteIdx++);
+                            }
+                            if ((bVal >> (7 - bitPos)) & 1) {
+                                this.setPixel(cx + ox + gx, cy + oy + gy, color);
+                            }
+                            bitPos = (bitPos + 1) & 7;
+                        }
+                    }
+                }
+                cx += adv;
+            }
+        }
+        centeredText(cx, cy, str, fontKey, color = 0) {
+            const bb = this.textBBox(str, fontKey);
+            const w = bb[2] - bb[0];
+            const h = bb[3] - bb[1];
+            this.text(Math.floor(cx - w / 2), Math.floor(cy - h / 2 - bb[1]), str, fontKey, color);
+        }
+        wrapText(str, fontKey, maxW) {
+            let s = String(str);
+            if (this.textWidth(s, fontKey) <= maxW) return s;
+            const dotsW = this.textWidth('..', fontKey);
+            while (s.length > 1 && (this.textWidth(s, fontKey) + dotsW) > maxW) {
+                s = s.slice(0, -1);
+            }
+            return s.trim() + '..';
+        }
+        flushToCanvas(ctx) {
+            const imgData = ctx.createImageData(this.w, this.h);
+            const d = imgData.data;
+            for (let i = 0, p = 0; i < this.buf.length; i++, p += 4) {
+                const v = this.buf[i] ? 255 : 0;
+                d[p] = d[p + 1] = d[p + 2] = v;
+                d[p + 3] = 255;
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+    }
+
+    // --- VẼ MẪU 2: BENTO GRID 4 Ô + TIN NÓNG (100% PIXEL PILLOW) ---
+    function renderDailyLayout2Canvas(ctx, w, h) {
+        const cityVal = (document.getElementById('d-city')?.value || 'HN').split('|')[0];
+        const temp = document.getElementById('d-temp')?.value || '18°C';
+        const wdesc = document.getElementById('d-wdesc')?.value || 'Mây';
+        const whum = document.getElementById('d-whum')?.value || '63%';
+        const wrange = document.getElementById('d-wrange')?.value || '15-20°';
+        const waqi = document.getElementById('d-waqi')?.value || 'AQI 56';
+        const sjc = document.getElementById('d-sjc')?.value || '130.0 - 135.0 tr';
+        const ring = document.getElementById('d-ring')?.value || '129.4 - 134.2 tr';
+        const a95 = document.getElementById('d-a95')?.value || '19,100';
+        const e5 = document.getElementById('d-e5')?.value || '18.6k';
+        const btc = document.getElementById('d-btc')?.value || '60,006 USD';
+        const btcChg = document.getElementById('d-btc-chg')?.value || '-3.0%';
+        const vni = document.getElementById('d-vni')?.value || '1,697.1';
+        const vniChg = document.getElementById('d-vni-chg')?.value || '+8.4';
+        const news1 = document.getElementById('d-news1')?.value || '1. Giá vàng biến động mạnh';
+        const news2 = document.getElementById('d-news2')?.value || '2. Khối ngoại mua ròng HOSE';
+
+        const d = new PilDraw1Bit(w, h, 1);
+
+        // 1. Ô trên trái: THỜI TIẾT
+        d.rect(0, 0, 82, 46, null, 0);
+        d.rect(0, 0, 82, 13, 0, null);
+        d.text(4, 1, 'THỜI TIẾT ' + cityVal, 'b9', 1);
+        d.text(4, 15, temp, 'b15', 0);
+        d.text(48, 15, wdesc, 'b9', 0);
+        d.text(48, 25, whum, 'r9', 0);
+        d.text(4, 34, `${wrange} • ${waqi}`, 'r9', 0);
+
+        // 2. Ô trên phải: VÀNG & XĂNG DẦU
+        d.rect(82, 0, 211, 46, null, 0);
+        d.rect(82, 0, 211, 13, 0, null);
+        d.text(86, 1, 'VÀNG & XĂNG DẦU', 'b9', 1);
+        d.text(86, 15, 'SJC: ' + sjc, 'b9', 0);
+        d.text(86, 25, 'Nhẫn: ' + ring, 'r9', 0);
+        d.text(86, 35, `A95: ${a95} | E5: ${e5}`, 'r9', 0);
+
+        // 3. Ô giữa trái: BITCOIN
+        const btcNum = parseFloat(btc.replace(/[^0-9.]/g, '')) || 60000;
+        const vndBillion = ((btcNum * 25400) / 1e9).toFixed(2);
+        d.rect(0, 46, 106, 72, null, 0);
+        d.text(4, 48, 'BTC: ' + btc, 'b9', 0);
+        d.text(4, 59, `${btcChg} (${vndBillion} tỷ đ)`, 'r9', 0);
+
+        // 4. Ô giữa phải: VN-INDEX
+        d.rect(106, 46, 211, 72, null, 0);
+        d.text(110, 48, `VNI: ${vni} (${vniChg})`, 'b9', 0);
+        d.text(110, 59, '+0.49% • GT:8.7k tỷ', 'r9', 0);
+
+        // 5. Khung đáy: TIN HOT
+        d.rect(0, 72, 211, 103, null, 0);
+        d.rect(3, 76, 26, 87, 0, null);
+        d.text(5, 76, 'HOT', 'b9', 1);
+        d.text(30, 76, d.wrapText(news1, 'r9', 178), 'r9', 0);
+        d.text(4, 89, d.wrapText(news2, 'r9', 203), 'r9', 0);
+
+        d.flushToCanvas(ctx);
+    }
+
+    // --- VẼ MẪU 3: BẢNG ĐIỆN TỬ TÀI CHÍNH + TIN NÓNG (100% PIXEL PILLOW) ---
+    function renderDailyLayout3Canvas(ctx, w, h) {
+        const cityVal = (document.getElementById('d-city')?.value || 'HN').split('|')[0];
+        const temp = (document.getElementById('d-temp')?.value || '18°C').replace('C', '');
+        const wdesc = document.getElementById('d-wdesc')?.value || 'Mây';
+        const sjc = document.getElementById('d-sjc')?.value || '130.0 - 135.0 tr';
+        const sjcChg = document.getElementById('d-sjc-chg')?.value || 'CL 5.0tr';
+        const a95Raw = document.getElementById('d-a95')?.value || '19,100';
+        const a95Short = a95Raw.includes(',') ? (parseInt(a95Raw.replace(/,/g, '')) / 1000).toFixed(1) + 'k' : a95Raw;
+        const e5 = document.getElementById('d-e5')?.value || '18.6k';
+        const btc = document.getElementById('d-btc')?.value || '60,006 USD';
+        const btcChg = document.getElementById('d-btc-chg')?.value || '-3.0%';
+        const vni = (document.getElementById('d-vni')?.value || '1,697.1') + ' đ';
+        const vniChg = document.getElementById('d-vni-chg')?.value || '+8.4';
+        const news1 = (document.getElementById('d-news1')?.value || '').replace(/^\d+\.\s*/, '');
+        const news2 = (document.getElementById('d-news2')?.value || '').replace(/^\d+\.\s*/, '');
+
+        const d = new PilDraw1Bit(w, h, 1);
+
+        // Top Bar: Thời tiết bên trái, Giá xăng A95 & E5 dãn thoáng và căn sát lề phải
+        d.rect(0, 0, 211, 15, 0, null);
+        d.text(3, 2, `${cityVal} ${temp} ${wdesc}`, 'b9', 1);
+        const fuelRight = `A95: ${a95Short}  |  E5: ${e5}`;
+        const fw = d.textWidth(fuelRight, 'b9');
+        d.text(208 - fw, 2, fuelRight, 'b9', 1);
+
+        // Table Header
+        d.text(4, 18, 'CHỈ SỐ', 'b9', 0);
+        d.text(76, 18, 'GIÁ HIỆN TẠI', 'b9', 0);
+        d.text(156, 18, 'BIẾN ĐỘNG', 'b9', 0);
+        d.line(0, 29, 211, 29, 0);
+
+        const rows = [
+            { name: 'VÀNG SJC', price: sjc, chg: sjcChg, y: 31 },
+            { name: 'BTC / USD', price: btc, chg: btcChg, y: 45 },
+            { name: 'VN-INDEX', price: vni, chg: vniChg, y: 59 }
+        ];
+        rows.forEach(r => {
+            d.text(4, r.y, r.name, 'b9', 0);
+            d.text(76, r.y, r.price, 'r9', 0);
+            d.rect(162, r.y, 208, r.y + 11, 0, null);
+            d.text(165, r.y, r.chg, 'b9', 1);
+        });
+
+        d.line(0, 73, 211, 73, 0);
+        d.text(4, 76, '» ' + d.wrapText(news1, 'r9', 194), 'r9', 0);
+        d.text(4, 88, '» ' + d.wrapText(news2, 'r9', 194), 'r9', 0);
+
+        d.rect(0, 0, 211, 103, null, 0);
+        d.flushToCanvas(ctx);
+    }
+
+    // --- VẼ MẪU 1: CRYPTO, VÀNG QUỐC TẾ & NGOẠI TỆ (100% GIỐNG web_idea1_crypto.png) ---
+    function renderCryptoForexCanvas(ctx, w, h) {
+        const btcPrice = document.getElementById('cr-btc-price')?.value || '96,420$';
+        const btcChg = document.getElementById('cr-btc-chg')?.value || '+3.8%';
+        const btcRange = document.getElementById('cr-btc-range')?.value || '24h: 92.1k - 97.0k';
+        const usdStr = document.getElementById('cr-usd')?.value || 'USD: 25,420đ';
+        const eurStr = document.getElementById('cr-eur')?.value || 'EUR: 26.8k';
+        const fngVal = Math.max(0, Math.min(100, parseInt(document.getElementById('cr-fng-val')?.value || '78')));
+        const fngLbl = document.getElementById('cr-fng-lbl')?.value || '78 THAM LAM';
+
+        const coins = [
+            { sym: 'ETH', pr: document.getElementById('cr-eth-p')?.value || '3,420$', chg: document.getElementById('cr-eth-c')?.value || '+4.2%' },
+            { sym: 'SOL', pr: document.getElementById('cr-sol-p')?.value || '238.5$', chg: document.getElementById('cr-sol-c')?.value || '+6.1%' },
+            { sym: 'BNB', pr: document.getElementById('cr-bnb-p')?.value || '652.0$', chg: document.getElementById('cr-bnb-c')?.value || '+1.4%' },
+            { sym: 'XAU', pr: document.getElementById('cr-xau-p')?.value || '2,685$', chg: document.getElementById('cr-xau-c')?.value || '+0.8%' }
+        ];
+
+        const d = new PilDraw1Bit(w, h, 1);
+
+        // Top Header Bar (y: 0..14)
+        d.rect(0, 0, 211, 14, 0, null);
+        d.text(4, 1, 'CRYPTO & FOREX', 'b10', 1);
+        d.text(134, 2, usdStr, 'b9', 1);
+
+        // Left Box: BTC Spotlight + 24h Sparkline Chart (x: 0..100, y: 14..72)
+        d.rect(0, 14, 100, 72, null, 0);
+        d.text(4, 16, 'BTC/USDT', 'b9', 0);
+        d.rect(60, 16, 96, 27, 0, null);
+        d.text(63, 16, btcChg, 'b9', 1);
+        d.text(4, 28, btcPrice, 'b14', 0);
+
+        // Sparkline points mapped into x: 4..94, y: 43..57
+        const pts = (btcSparklinePoints && btcSparklinePoints.length >= 2)
+            ? btcSparklinePoints
+            : [92100, 92800, 91900, 93400, 93100, 94600, 94100, 95500, 96420];
+        const minP = Math.min(...pts);
+        const maxP = Math.max(...pts);
+        const span = Math.max(1, maxP - minP);
+        const poly = [];
+        for (let i = 0; i < pts.length; i++) {
+            const px = 4 + Math.round((i * 90) / (pts.length - 1));
+            const py = 57 - Math.round(((pts[i] - minP) * 14) / span);
+            poly.push([px, py]);
+        }
+        d.polyline(poly, 0);
+        d.text(4, 59, btcRange, 'r9', 0);
+
+        // Right Box: Top Altcoins & Gold XAU/USD (x: 100..211, y: 14..72)
+        d.rect(100, 14, 211, 72, null, 0);
+        let cy = 17;
+        coins.forEach(c => {
+            d.text(104, cy, c.sym, 'b9', 0);
+            d.text(132, cy, c.pr, 'r9', 0);
+            d.text(174, cy, c.chg, 'b9', 0);
+            cy += 13;
+        });
+
+        // Bottom Bar: Fear & Greed Index + Progress Bar (y: 72..103)
+        d.rect(0, 72, 211, 103, null, 0);
+        d.text(4, 75, 'F&G Index:', 'b9', 0);
+        d.rect(64, 75, 136, 86, 0, null);
+        d.text(68, 75, fngLbl, 'b9', 1);
+        d.text(142, 75, eurStr, 'r9', 0);
+
+        d.rect(4, 90, 207, 98, 1, 0);
+        const fillW = Math.round((200 * fngVal) / 100);
+        if (fillW > 0) d.rect(5, 91, 5 + fillW, 97, 0, null);
+
+        d.flushToCanvas(ctx);
+    }
+
+    // --- VẼ MẪU 2: LỊCH THI ĐẤU & TỶ SỐ BÓNG ĐÁ LIVE (100% GIỐNG web_idea2_football.png) ---
+    function renderFootballCanvas(ctx, w, h) {
+        const leagueVal = document.getElementById('fb-league-select')?.value || 'eng.1|BÓNG ĐÁ • NGOẠI HẠNG ANH & C1';
+        const leagueTitle = (leagueVal.split('|')[1] || 'BÓNG ĐÁ • NGOẠI HẠNG ANH & C1').toUpperCase();
+
+        const matches = [1, 2, 3, 4].map(i => {
+            const st = document.getElementById(`fb-m${i}-st`)?.value || 'FT';
+            const home = document.getElementById(`fb-m${i}-home`)?.value || 'Arsenal';
+            const score = document.getElementById(`fb-m${i}-score`)?.value || '3 - 1';
+            const away = document.getElementById(`fb-m${i}-away`)?.value || 'Man United';
+            const isLive = st.includes("'") || st.toUpperCase().includes('LIVE') || st.toUpperCase() === 'HT';
+            const hasScore = score.includes('-');
+            return { st, home, score, away, isLive, highlight: isLive || hasScore };
+        });
+        const footer = document.getElementById('fb-footer')?.value || 'TOP: 1.LIV (31đ) • 2.MCI (26đ) • 3.ARS (25đ)';
+
+        const d = new PilDraw1Bit(w, h, 1);
+
+        // Header Bar (y: 0..15)
+        d.rect(0, 0, 211, 15, 0, null);
+        d.text(4, 2, leagueTitle, 'b9', 1);
+
+        // 4 Match rows (y = 19, step = 16)
+        let y = 19;
+        matches.forEach(m => {
+            if (m.isLive) {
+                d.rect(3, y, 31, y + 12, 0, null);
+                const stW = d.textWidth(m.st, 'b9');
+                d.text(3 + Math.max(2, Math.floor((28 - stW) / 2)), y + 1, m.st, 'b9', 1);
+            } else {
+                d.rect(3, y, 31, y + 12, null, 0);
+                const stW = d.textWidth(m.st, 'r9');
+                d.text(3 + Math.max(2, Math.floor((28 - stW) / 2)), y + 1, m.st, 'r9', 0);
+            }
+
+            // Home team (x: 36..100)
+            d.text(36, y + 1, d.wrapText(m.home, 'b9', 64), 'b9', 0);
+
+            // Center Score Badge (x: 102..134)
+            if (m.highlight) {
+                d.rect(102, y, 134, y + 12, 0, 0);
+                const sw = d.textWidth(m.score, 'b9');
+                d.text(118 - Math.floor(sw / 2), y + 1, m.score, 'b9', 1);
+            } else {
+                d.rect(102, y, 134, y + 12, 1, 0);
+                const sw = d.textWidth(m.score, 'b9');
+                d.text(118 - Math.floor(sw / 2), y + 1, m.score, 'b9', 0);
+            }
+
+            // Away team (x: 140..208)
+            d.text(140, y + 1, d.wrapText(m.away, 'b9', 68), 'b9', 0);
+            y += 16;
+        });
+
+        // Footer Line & Standings (y: 84..103)
+        d.line(0, 84, 211, 84, 0);
+        d.text(4, 88, d.wrapText(footer, 'b9', 204), 'b9', 0);
+        d.rect(0, 0, 211, 103, null, 0);
+
+        d.flushToCanvas(ctx);
+    }
+
+    // --- VẼ MẪU 3: TRẠM THỜI TIẾT PRO 48H & AQI/UV (100% GIỐNG web_idea3_weather_pro.png) ---
+    function renderWeatherProCanvas(ctx, w, h) {
+        const cityName = ((document.getElementById('wp-city')?.value || 'HÀ NỘI').split('|')[0]).toUpperCase();
+        const temp = document.getElementById('wp-temp')?.value || '21°C';
+        const desc = document.getElementById('wp-desc')?.value || 'Mát';
+        const range = document.getElementById('wp-range')?.value || '15-24°';
+        const uvhum = document.getElementById('wp-uvhum')?.value || 'UV:4 • 68%';
+        const feel = document.getElementById('wp-feel')?.value || 'Cảm giác: 19°C';
+        const rain = document.getElementById('wp-rain')?.value || 'Mưa: 15% (0.2mm)';
+        const aqi = document.getElementById('wp-aqi')?.value || 'AQI 112 • Kém';
+
+        const cols = [1, 2, 3, 4].map(i => {
+            const raw = (document.getElementById(`wp-h${i}`)?.value || '12h|24°|10%').split('|');
+            return { hr: raw[0] || '12h', tp: raw[1] || '24°', rn: raw[2] || '10%' };
+        });
+
+        const days = document.getElementById('wp-days')?.value || 'Mai: 17-24° Mây | T6: 14-19° Mưa | T7: 13-18°';
+        const pm25 = document.getElementById('wp-pm25')?.value || 'PM2.5: 42 µg/m³ • Khuyến cáo đeo khẩu trang';
+
+        const d = new PilDraw1Bit(w, h, 1);
+
+        // Top Header Bar (y: 0..14)
+        d.rect(0, 0, 211, 14, 0, null);
+        d.text(4, 1, `THỜI TIẾT • ${cityName}`, 'b10', 1);
+        const uvw = d.textWidth(uvhum, 'r9');
+        d.text(208 - uvw, 2, uvhum, 'r9', 1);
+
+        // Left Panel: Current Weather & AQI Badge (x: 0..86, y: 15..76)
+        d.line(86, 15, 86, 76, 0);
+        d.text(4, 16, temp, 'b16', 0);
+        d.text(52, 17, d.wrapText(desc, 'b9', 33), 'b9', 0);
+        d.text(52, 27, range, 'r9', 0);
+        d.text(4, 38, feel, 'r9', 0);
+        d.text(4, 50, rain, 'r9', 0);
+        d.rect(4, 62, 82, 74, 0, null);
+        d.text(7, 63, aqi, 'b9', 1);
+
+        // Right Panel: 4 Hourly Forecast Cards (x: 91..207, y: 18..73)
+        let cx = 91;
+        cols.forEach(c => {
+            d.rect(cx, 18, cx + 27, 73, null, 0);
+            d.rect(cx, 18, cx + 27, 29, 0, null);
+            d.text(cx + 5, 18, c.hr, 'b9', 1);
+            d.text(cx + 4, 33, c.tp, 'b10', 0);
+            d.text(cx + 4, 47, 'Mưa', 'r9', 0);
+            d.text(cx + 3, 59, c.rn, 'b9', 0);
+            cx += 29;
+        });
+
+        // Bottom Strip: 3-Day Forecast & PM2.5 Advisory (y: 76..103)
+        d.line(0, 76, 211, 76, 0);
+        d.text(4, 79, d.wrapText(days, 'b9', 204), 'b9', 0);
+        d.text(4, 91, d.wrapText(pm25, 'r9', 204), 'r9', 0);
+        d.rect(0, 0, 211, 103, null, 0);
+
+        d.flushToCanvas(ctx);
+    }
+
+    // --- VẼ MẪU 4: LỊCH VẠN NIÊN ÂM DƯƠNG + ĐẾM NGƯỢC TẾT + CHECKLIST (100% PIXEL PILLOW) ---
+    function renderLunarTodoCanvas(ctx, w, h) {
+        const header = document.getElementById('ln-header')?.value || 'THỨ TƯ • T11';
+        const dayBig = document.getElementById('ln-day')?.value || '25';
+        const lunarStr = document.getElementById('ln-lunar')?.value || '17/10 Âm lịch';
+        const evName = document.getElementById('ln-ev-name')?.value || 'TẾT Đinh Mùi';
+        const evDays = document.getElementById('ln-ev-days')?.value || 'Còn 73 ngày';
+
+        const todos = [1, 2, 3, 4].map(i => ({
+            done: !!document.getElementById(`td-chk-${i}`)?.checked,
+            text: document.getElementById(`td-txt-${i}`)?.value || ''
+        }));
+        const doneCount = todos.filter(t => t.done).length;
+
+        const d = new PilDraw1Bit(w, h, 1);
+        const midX = 86; // Mở rộng cột trái lên 86px để vừa trọn chữ "TẾT Đinh Mùi" không bị cắt
+
+        // Left Column: Tear-off Calendar + Tết Countdown Box (x: 0..86)
+        d.rect(0, 0, midX, 103, null, 0);
+        d.rect(0, 0, midX, 15, 0, null);
+        const hw = d.textWidth(header, 'b9');
+        d.text(Math.max(3, Math.floor((midX - hw) / 2)), 2, header, 'b9', 1);
+
+        // Ngày Dương lịch cỡ lớn nổi bật (b24), bỏ Giờ Hoàng Đạo
+        const dw = d.textWidth(dayBig, 'b24');
+        d.text(Math.floor((midX - dw) / 2), 16, dayBig, 'b24', 0);
+
+        const lw = d.textWidth(lunarStr, 'b9');
+        d.text(Math.max(3, Math.floor((midX - lw) / 2)), 48, lunarStr, 'b9', 0);
+        d.line(4, 62, midX - 4, 62, 0);
+
+        // Black Countdown Box (x: 4..82, y: 66..99)
+        d.rect(4, 66, midX - 4, 99, 0, null);
+        const evNameW = d.textWidth(evName, 'b9');
+        d.text(4 + Math.max(2, Math.floor((midX - 8 - evNameW) / 2)), 69, d.wrapText(evName, 'b9', midX - 10), 'b9', 1);
+        const evDaysW = d.textWidth(evDays, 'b9');
+        d.text(4 + Math.max(2, Math.floor((midX - 8 - evDaysW) / 2)), 83, d.wrapText(evDays, 'b9', midX - 10), 'b9', 1);
+
+        // Right Column: To-Do List + Progress Bar (x: 86..211)
+        d.rect(midX, 0, 211, 15, 0, null);
+        d.text(midX + 6, 2, 'VIỆC CẦN LÀM HÔM NAY', 'b9', 1);
+
+        let y = 20;
+        todos.forEach(t => {
+            const chkStr = t.done ? '[x]' : '[ ]';
+            d.text(midX + 4, y, chkStr, 'b9', 0);
+            d.text(midX + 22, y, d.wrapText(t.text, 'r9', 209 - (midX + 22)), 'r9', 0);
+            y += 15;
+        });
+
+        d.line(midX + 4, 82, 208, 82, 0);
+        d.text(midX + 4, 86, `Tiến độ: ${doneCount}/4`, 'b9', 0);
+        d.rect(154, 87, 206, 96, null, 0);
+        const barFill = Math.round((50 * doneCount) / 4);
+        if (barFill > 0) d.rect(155, 88, 155 + barFill, 95, 0, null);
+
+        d.rect(0, 0, 211, 103, null, 0);
+        d.flushToCanvas(ctx);
+    }
+
+    // --- FETCH DỮ LIỆU THẬT TRỰC TIẾP TỪ TRÌNH DUYỆT (100% CORS PUBLIC APIS) ---
+    function onCityChange() {
+        fetchLiveDailyData();
+    }
+
+    async function fetchLiveDailyData() {
+        const btn = document.getElementById('btn-fetch-daily');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu...';
+        }
+        const cityParts = (document.getElementById('d-city')?.value || 'HN|21.0285|105.8542').split('|');
+        const lat = cityParts[1] || '21.0285';
+        const lon = cityParts[2] || '105.8542';
+
+        const wmoMap = { 0: 'Quang', 1: 'Ít mây', 2: 'Có mây', 3: 'Mây', 45: 'Sương', 51: 'Mưa', 61: 'Mưa', 63: 'Mưa', 65: 'Mưa to', 80: 'Mưa', 95: 'Giông' };
+
+        // 1. Open-Meteo Weather & AQI
+        try {
+            const wRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FBangkok&forecast_days=1`);
+            const wJson = await wRes.json();
+            if (wJson.current) {
+                document.getElementById('d-temp').value = Math.round(wJson.current.temperature_2m) + '°C';
+                document.getElementById('d-whum').value = Math.round(wJson.current.relative_humidity_2m) + '%';
+                document.getElementById('d-wdesc').value = wmoMap[wJson.current.weather_code] || 'Mát';
+            }
+            if (wJson.daily) {
+                const tmin = Math.round(wJson.daily.temperature_2m_min[0]);
+                const tmax = Math.round(wJson.daily.temperature_2m_max[0]);
+                document.getElementById('d-wrange').value = `${tmin}-${tmax}°`;
+            }
+        } catch (e) { console.warn('Weather fetch error:', e); }
+
+        try {
+            const aRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi`);
+            const aJson = await aRes.json();
+            if (aJson.current && aJson.current.us_aqi != null) {
+                document.getElementById('d-waqi').value = 'AQI ' + Math.round(aJson.current.us_aqi);
+            }
+        } catch (e) { console.warn('AQI fetch error:', e); }
+
+        // 2. Binance Bitcoin API
+        try {
+            const bRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+            const bJson = await bRes.json();
+            if (bJson.lastPrice) {
+                const p = Math.round(parseFloat(bJson.lastPrice)).toLocaleString('en-US');
+                const chg = parseFloat(bJson.priceChangePercent).toFixed(1);
+                document.getElementById('d-btc').value = p + ' USD';
+                document.getElementById('d-btc-chg').value = (chg >= 0 ? '+' : '') + chg + '%';
+            }
+        } catch (e) { console.warn('BTC fetch error:', e); }
+
+        // 3. VnExpress Tin Nóng RSS
+        try {
+            const rRes = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://vnexpress.net/rss/tin-noi-bat.rss'));
+            const rJson = await rRes.json();
+            if (rJson.items && rJson.items.length >= 2) {
+                document.getElementById('d-news1').value = '1. ' + rJson.items[0].title;
+                document.getElementById('d-news2').value = '2. ' + rJson.items[1].title;
+            }
+        } catch (e) { console.warn('RSS fetch error:', e); }
+
+        renderActiveDashboard();
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-cloud-download"></i> Lấy dữ liệu trực tuyến mới nhất';
+        }
+    }
+
+    // --- MẪU 1 FETCHER: BINANCE + FOREX + FEAR & GREED ---
+    async function fetchLiveCryptoForexData() {
+        const btn = document.getElementById('btn-fetch-crypto');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải Binance & Forex...';
+        }
+        try {
+            const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'PAXGUSDT'];
+            const responses = await Promise.all(symbols.map(s => fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${s}`).then(r => r.json())));
+            const [btc, eth, sol, bnb, paxg] = responses;
+
+            if (btc && btc.lastPrice) {
+                document.getElementById('cr-btc-price').value = Math.round(parseFloat(btc.lastPrice)).toLocaleString('en-US') + '$';
+                const bc = parseFloat(btc.priceChangePercent).toFixed(1);
+                document.getElementById('cr-btc-chg').value = (bc >= 0 ? '+' : '') + bc + '%';
+                const bl = (parseFloat(btc.lowPrice) / 1000).toFixed(1) + 'k';
+                const bh = (parseFloat(btc.highPrice) / 1000).toFixed(1) + 'k';
+                document.getElementById('cr-btc-range').value = `24h: ${bl} - ${bh}`;
+            }
+            if (eth && eth.lastPrice) {
+                document.getElementById('cr-eth-p').value = Math.round(parseFloat(eth.lastPrice)).toLocaleString('en-US') + '$';
+                const ec = parseFloat(eth.priceChangePercent).toFixed(1);
+                document.getElementById('cr-eth-c').value = (ec >= 0 ? '+' : '') + ec + '%';
+            }
+            if (sol && sol.lastPrice) {
+                document.getElementById('cr-sol-p').value = parseFloat(sol.lastPrice).toFixed(1) + '$';
+                const sc = parseFloat(sol.priceChangePercent).toFixed(1);
+                document.getElementById('cr-sol-c').value = (sc >= 0 ? '+' : '') + sc + '%';
+            }
+            if (bnb && bnb.lastPrice) {
+                document.getElementById('cr-bnb-p').value = parseFloat(bnb.lastPrice).toFixed(1) + '$';
+                const bnc = parseFloat(bnb.priceChangePercent).toFixed(1);
+                document.getElementById('cr-bnb-c').value = (bnc >= 0 ? '+' : '') + bnc + '%';
+            }
+            if (paxg && paxg.lastPrice) {
+                document.getElementById('cr-xau-p').value = Math.round(parseFloat(paxg.lastPrice)).toLocaleString('en-US') + '$';
+                const pc = parseFloat(paxg.priceChangePercent).toFixed(1);
+                document.getElementById('cr-xau-c').value = (pc >= 0 ? '+' : '') + pc + '%';
+            }
+
+            // Lấy nến 2h trong 24h qua để vẽ Sparkline thật
+            const kRes = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=2h&limit=12');
+            const kJson = await kRes.json();
+            if (Array.isArray(kJson) && kJson.length >= 4) {
+                btcSparklinePoints = kJson.map(k => parseFloat(k[4]));
+            }
+        } catch (e) { console.warn('Binance Crypto fetch error:', e); }
+
+        // Tỷ giá USD/VND & EUR/VND (open.er-api.com hỗ trợ CORS 100%)
+        try {
+            const fxRes = await fetch('https://open.er-api.com/v6/latest/USD');
+            const fxJson = await fxRes.json();
+            if (fxJson && fxJson.rates && fxJson.rates.VND) {
+                const usdVnd = Math.round(fxJson.rates.VND);
+                document.getElementById('cr-usd').value = `USD: ${usdVnd.toLocaleString('en-US')}đ`;
+                if (fxJson.rates.EUR) {
+                    const eurVnd = (usdVnd / fxJson.rates.EUR / 1000).toFixed(1);
+                    document.getElementById('cr-eur').value = `EUR: ${eurVnd}k`;
+                }
+            }
+        } catch (e) { console.warn('Forex fetch error:', e); }
+
+        // Chỉ số Fear & Greed Index (alternative.me hỗ trợ CORS 100%)
+        try {
+            const fgRes = await fetch('https://api.alternative.me/fng/?limit=1');
+            const fgJson = await fgRes.json();
+            if (fgJson && fgJson.data && fgJson.data[0]) {
+                const val = parseInt(fgJson.data[0].value);
+                let vnLbl = 'TRUNG LẬP';
+                if (val >= 75) vnLbl = 'CỰC THAM';
+                else if (val >= 55) vnLbl = 'THAM LAM';
+                else if (val <= 25) vnLbl = 'CỰC SỢ';
+                else if (val <= 45) vnLbl = 'SỢ HÃI';
+                document.getElementById('cr-fng-val').value = val;
+                document.getElementById('cr-fng-lbl').value = `${val} ${vnLbl}`;
+            }
+        } catch (e) { console.warn('F&G fetch error:', e); }
+
+        renderActiveDashboard();
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-refresh"></i> Cập nhật Giá & Chart 24h';
+        }
+    }
+
+    // --- MẪU 2 FETCHER: ESPN LIVE FOOTBALL SCOREBOARD + STANDINGS ---
+    async function fetchLiveFootballData() {
+        const btn = document.getElementById('btn-fetch-football');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải tỷ số & BXH ESPN...';
+        }
+        const leagueVal = document.getElementById('fb-league-select')?.value || 'eng.1|BÓNG ĐÁ • NGOẠI HẠNG ANH';
+        const leagueCode = leagueVal.split('|')[0] || 'eng.1';
+
+        try {
+            // 1. Gọi scoreboard mặc định để lấy danh sách ngày thi đấu (calendar) của giải
+            const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/scoreboard`);
+            const data = await res.json();
+            let allEvents = Array.isArray(data?.events) ? [...data.events] : [];
+
+            // Nếu ngày hôm nay có ít hơn 4 trận (ví dụ giữa tuần Ngoại Hạng Anh chỉ có 1 trận đá sớm),
+            // tự động lấy thêm các ngày thi đấu kế tiếp / vừa qua trong lịch giải đấu để luôn đủ 4 trận thật!
+            const cal = data?.leagues?.[0]?.calendar;
+            if (allEvents.length < 4 && Array.isArray(cal) && cal.length > 0) {
+                const nowMs = Date.now();
+                // Tìm các ngày trong calendar gần thời điểm hiện tại nhất (trong vòng -4 ngày đến +10 ngày)
+                const nearDates = cal
+                    .map(c => ({ raw: c, ms: new Date(c).getTime(), ymd: c.slice(0, 10).replace(/-/g, '') }))
+                    .filter(item => Math.abs(item.ms - nowMs) <= 10 * 86400000)
+                    .sort((a, b) => Math.abs(a.ms - nowMs) - Math.abs(b.ms - nowMs))
+                    .slice(0, 3);
+
+                for (const dItem of nearDates) {
+                    if (allEvents.length >= 4) break;
+                    try {
+                        const rMore = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${leagueCode}/scoreboard?dates=${dItem.ymd}`);
+                        const dMore = await rMore.json();
+                        if (Array.isArray(dMore?.events)) {
+                            for (const ev of dMore.events) {
+                                if (!allEvents.some(existing => existing.id === ev.id)) {
+                                    allEvents.push(ev);
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (allEvents.length > 0) {
+                // Ưu tiên trận đang đá (in) -> sắp đá (pre) -> vừa kết thúc (post)
+                const orderWeight = { 'in': 0, 'pre': 1, 'post': 2 };
+                allEvents.sort((a, b) => {
+                    const wa = orderWeight[a.status?.type?.state] ?? 3;
+                    const wb = orderWeight[b.status?.type?.state] ?? 3;
+                    if (wa !== wb) return wa - wb;
+                    return new Date(a.date).getTime() - new Date(b.date).getTime();
+                });
+
+                const events = allEvents.slice(0, 4);
+                events.forEach((ev, idx) => {
+                    const comp = ev.competitions && ev.competitions[0];
+                    if (!comp) return;
+                    const competitors = comp.competitors || [];
+                    const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+                    const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+                    if (!home || !away) return;
+
+                    const hName = home.team?.shortDisplayName || home.team?.name || 'Home';
+                    const aName = away.team?.shortDisplayName || away.team?.name || 'Away';
+                    const state = ev.status?.type?.state || 'pre'; // 'pre' | 'in' | 'post'
+                    let stStr = 'FT';
+                    let scStr = `${home.score ?? 0} - ${away.score ?? 0}`;
+
+                    if (state === 'in') {
+                        stStr = ev.status?.displayClock || 'LIVE';
+                    } else if (state === 'pre') {
+                        const dt = new Date(ev.date);
+                        const hh = String(dt.getHours()).padStart(2, '0') + ':' + String(dt.getMinutes()).padStart(2, '0');
+                        stStr = hh;
+                        scStr = `${ dt.getDate() }/${ dt.getMonth() + 1 }`;
+                    } else {
+                        stStr = 'FT';
+                    }
+
+                    const n = idx + 1;
+                    if (document.getElementById(`fb-m${n}-st`)) document.getElementById(`fb-m${n}-st`).value = stStr;
+                    if (document.getElementById(`fb-m${n}-home`)) document.getElementById(`fb-m${n}-home`).value = hName;
+                    if (document.getElementById(`fb-m${n}-score`)) document.getElementById(`fb-m${n}-score`).value = scStr;
+                    if (document.getElementById(`fb-m${n}-away`)) document.getElementById(`fb-m${n}-away`).value = aName;
+                });
+            }
+
+            // 2. Gọi thêm API Bảng xếp hạng (Standings) của giải đấu để cập nhật dòng TOP 1, 2, 3 dưới đáy
+            try {
+                const stRes = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/${leagueCode}/standings`);
+                const stData = await stRes.json();
+                const entries = stData?.children?.[0]?.standings?.entries;
+                if (Array.isArray(entries) && entries.length >= 3) {
+                    const top3 = entries.slice(0, 3).map((e, i) => {
+                        const abbr = e.team?.abbreviation || e.team?.shortDisplayName || '';
+                        const ptsObj = (e.stats || []).find(s => s.name === 'points');
+                        const pts = ptsObj ? ptsObj.displayValue : '';
+                        return `${i + 1}.${abbr} (${pts}đ)`;
+                    });
+                    if (document.getElementById('fb-footer')) {
+                        document.getElementById('fb-footer').value = 'TOP: ' + top3.join(' • ');
+                    }
+                }
+            } catch (e) { console.warn('ESPN Standings fetch error:', e); }
+        } catch (e) { console.warn('ESPN Football fetch error:', e); }
+
+        renderActiveDashboard();
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-refresh"></i> Tải tỷ số trực tiếp (ESPN)';
+        }
+    }
+
+    // --- MẪU 3 FETCHER: OPEN-METEO PRO WEATHER + HOURLY RAIN + UV + AQI/PM2.5 ---
+    async function fetchLiveWeatherProData() {
+        const btn = document.getElementById('btn-fetch-wpro');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu...';
+        }
+        const parts = (document.getElementById('wp-city')?.value || 'HÀ NỘI|21.0285|105.8542').split('|');
+        const lat = parts[1] || '21.0285';
+        const lon = parts[2] || '105.8542';
+        const wmoMap = { 0: 'Quang', 1: 'Ít mây', 2: 'Có mây', 3: 'Mây', 45: 'Sương', 51: 'Mưa', 61: 'Mưa', 63: 'Mưa', 65: 'Mưa to', 80: 'Mưa', 95: 'Giông' };
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+        try {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,uv_index&hourly=temperature_2m,precipitation_probability&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=Asia%2FBangkok&forecast_days=4`;
+            const res = await fetch(url);
+            const w = await res.json();
+            if (w.current) {
+                document.getElementById('wp-temp').value = Math.round(w.current.temperature_2m) + '°C';
+                document.getElementById('wp-desc').value = wmoMap[w.current.weather_code] || 'Mát';
+                document.getElementById('wp-feel').value = `Cảm giác: ${Math.round(w.current.apparent_temperature)}°C`;
+                const uv = w.current.uv_index != null ? Math.round(w.current.uv_index) : 0;
+                document.getElementById('wp-uvhum').value = `UV:${uv} • ${Math.round(w.current.relative_humidity_2m)}%`;
+            }
+            if (w.daily && Array.isArray(w.daily.temperature_2m_min)) {
+                const tmin0 = Math.round(w.daily.temperature_2m_min[0]);
+                const tmax0 = Math.round(w.daily.temperature_2m_max[0]);
+                document.getElementById('wp-range').value = `${tmin0}-${tmax0}°`;
+                const rProb = w.daily.precipitation_probability_max?.[0] || 0;
+                const rMm = (w.current?.precipitation || 0).toFixed(1);
+                document.getElementById('wp-rain').value = `Mưa: ${rProb}% (${rMm}mm)`;
+            }
+            if (w.hourly && Array.isArray(w.hourly.time)) {
+                const nowHr = new Date().getHours();
+                for (let k = 0; k < 4; k++) {
+                    const targetIdx = Math.min(w.hourly.time.length - 1, nowHr + (k + 1) * 3);
+                    const tStr = w.hourly.time[targetIdx] || '';
+                    const hrLabel = (tStr.split('T')[1] || '12:00').slice(0, 2) + 'h';
+                    const tp = Math.round(w.hourly.temperature_2m[targetIdx] || 24) + '°';
+                    const rn = Math.round(w.hourly.precipitation_probability[targetIdx] || 0) + '%';
+                    const inp = document.getElementById(`wp-h${k + 1}`);
+                    if (inp) inp.value = `${hrLabel}|${tp}|${rn}`;
+                }
+            }
+            if (w.daily && Array.isArray(w.daily.time) && w.daily.time.length >= 4) {
+                const segs = [];
+                for (let dIdx = 1; dIdx <= 3; dIdx++) {
+                    const dt = new Date(w.daily.time[dIdx]);
+                    const dn = dIdx === 1 ? 'Mai' : dayNames[dt.getDay()];
+                    const tmin = Math.round(w.daily.temperature_2m_min[dIdx]);
+                    const tmax = Math.round(w.daily.temperature_2m_max[dIdx]);
+                    const dDesc = dIdx <= 2 ? (' ' + (wmoMap[w.daily.weather_code?.[dIdx]] || 'Mây')) : '';
+                    segs.push(`${dn}: ${tmin}-${tmax}°${dDesc}`);
+                }
+                document.getElementById('wp-days').value = segs.join(' | ');
+            }
+        } catch (e) { console.warn('Weather Pro fetch error:', e); }
+
+        try {
+            const aRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5`);
+            const aJson = await aRes.json();
+            if (aJson.current) {
+                const aqi = Math.round(aJson.current.us_aqi || 50);
+                let lvl = 'Tốt';
+                if (aqi > 150) lvl = 'Xấu';
+                else if (aqi > 100) lvl = 'Kém';
+                else if (aqi > 50) lvl = 'TB';
+                document.getElementById('wp-aqi').value = `AQI ${aqi} • ${lvl}`;
+                if (aJson.current.pm2_5 != null) {
+                    const pm = Math.round(aJson.current.pm2_5);
+                    const advice = aqi > 100 ? 'Khuyến cáo đeo khẩu trang' : 'Không khí trong lành';
+                    document.getElementById('wp-pm25').value = `PM2.5: ${pm} µg/m³ • ${advice}`;
+                }
+            }
+        } catch (e) { console.warn('AQI Pro fetch error:', e); }
+
+        renderActiveDashboard();
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa fa-cloud-download"></i> Cập nhật Dự báo Theo Giờ & AQI';
+        }
+    }
+
+    // --- MẪU 4 HELPER: LỊCH ÂM DƯƠNG VIỆT NAM & LOCALSTORAGE TO-DO LIST ---
+    function refreshLunarCalendarToday() {
+        const now = new Date();
+        const dd = now.getDate();
+        const mm = now.getMonth() + 1;
+        const yyyy = now.getFullYear();
+        const dayNamesFull = ['CHỦ NHẬT', 'THỨ HAI', 'THỨ BA', 'THỨ TƯ', 'THỨ NĂM', 'THỨ SÁU', 'THỨ BẢY'];
+        const dow = dayNamesFull[now.getDay()];
+        if (document.getElementById('ln-header')) document.getElementById('ln-header').value = `${dow} • T${mm}`;
+        if (document.getElementById('ln-day')) document.getElementById('ln-day').value = String(dd);
+
+        if (typeof solarToLunar === 'function') {
+            // solarToLunar(year, month, day) trả về { lyear (offset từ 2020), lmonth, lday, isLeap }
+            const lun = solarToLunar(yyyy, mm, dd);
+            const lDay = lun.lday || lun.day || 1;
+            const lMonth = lun.lmonth || lun.month || 1;
+            const lYearFull = (lun.lyear != null) ? (2020 + lun.lyear) : (lun.year || yyyy);
+
+            if (document.getElementById('ln-lunar')) {
+                document.getElementById('ln-lunar').value = `${String(lDay).padStart(2, '0')}/${String(lMonth).padStart(2, '0')} Âm lịch`;
+            }
+            const can = ['Giáp', 'Ất', 'Bính', 'Đinh', 'Mậu', 'Kỷ', 'Canh', 'Tân', 'Nhâm', 'Quý'];
+            const chi = ['Tý', 'Sửu', 'Dần', 'Mão', 'Thìn', 'Tỵ', 'Ngọ', 'Mùi', 'Thân', 'Dậu', 'Tuất', 'Hợi'];
+
+            let daysToTet = 0;
+            let nextTetYear = lYearFull + 1;
+            for (let step = 1; step <= 400; step++) {
+                const testDate = new Date(now.getTime() + step * 86400000);
+                const tl = solarToLunar(testDate.getFullYear(), testDate.getMonth() + 1, testDate.getDate());
+                const td = tl.lday || tl.day;
+                const tm = tl.lmonth || tl.month;
+                if (td === 1 && tm === 1 && !tl.isLeap) {
+                    daysToTet = step;
+                    nextTetYear = (tl.lyear != null) ? (2020 + tl.lyear) : (tl.year || (yyyy + 1));
+                    break;
+                }
+            }
+            if (daysToTet > 0) {
+                const tetCanChi = `${can[(nextTetYear + 6) % 10]} ${chi[(nextTetYear + 8) % 12]}`;
+                if (document.getElementById('ln-ev-name')) document.getElementById('ln-ev-name').value = `TẾT ${tetCanChi}`;
+                if (document.getElementById('ln-ev-days')) document.getElementById('ln-ev-days').value = `Còn ${daysToTet} ngày`;
+            }
+        }
+        loadSavedTodos();
+        renderActiveDashboard();
+    }
+
+    function saveAndRenderTodos() {
+        try {
+            const data = [1, 2, 3, 4].map(i => ({
+                done: !!document.getElementById(`td-chk-${i}`)?.checked,
+                text: document.getElementById(`td-txt-${i}`)?.value || ''
+            }));
+            localStorage.setItem('eink_lunar_todos_v2', JSON.stringify(data));
+        } catch (e) {}
+        renderActiveDashboard();
+    }
+
+    function loadSavedTodos() {
+        try {
+            const defaults = [
+                { done: true,  text: '9:30 Task 1' },
+                { done: false, text: '11:00 Task 2' },
+                { done: false, text: '14:30 Task 3' },
+                { done: false, text: '16:30 Task 4' }
+            ];
+            const raw = localStorage.getItem('eink_lunar_todos_v2');
+            const data = raw ? JSON.parse(raw) : defaults;
+            if (Array.isArray(data)) {
+                data.forEach((item, idx) => {
+                    const i = idx + 1;
+                    const chk = document.getElementById(`td-chk-${i}`);
+                    const txt = document.getElementById(`td-txt-${i}`);
+                    const isPlaceholder = !item.text || /^Task\s*\d+$/i.test(item.text.trim());
+                    if (chk) chk.checked = isPlaceholder ? defaults[idx].done : !!item.done;
+                    if (txt) txt.value = isPlaceholder ? defaults[idx].text : item.text;
+                });
+            }
+        } catch (e) {}
+    }
+
+    // --- ĐẨY CANVAS DASHBOARD XUỐNG ĐỒNG HỒ: TỰ KẾT NỐI -> GỬI ẢNH -> TỰ NGẮT KẾT NỐI ---
+    async function pushDashboardNow() {
+        const SVC_UUID = '0000ff00-0000-1000-8000-00805f9b34fb';
+        const CHR_UUID = '0000ff01-0000-1000-8000-00805f9b34fb';
+
+        // Nếu chưa chọn thiết bị lần nào, mở popup chọn đồng hồ 1 lần duy nhất
+        let targetDev = savedBleDevice || device;
+        if (!targetDev) {
+            targetDev = await selectBleDeviceForDashboard();
+            if (!targetDev) return;
+        }
+
+        const pushBtn = document.getElementById('dash-push-now-btn');
+        if (pushBtn) {
+            pushBtn.disabled = true;
+            pushBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Đang tải dữ liệu & kết nối BLE...';
+        }
+
+        try {
+            // 1. Cập nhật dữ liệu mới nhất cho mẫu đang chọn trước khi kết nối BLE
+            if (currentDashMode === 'daily') await fetchLiveDailyData();
+            else if (currentDashMode === 'crypto') await fetchLiveCryptoForexData();
+            else if (currentDashMode === 'football') await fetchLiveFootballData();
+            else if (currentDashMode === 'weather') await fetchLiveWeatherProData();
+            else if (currentDashMode === 'lunar') refreshLunarCalendarToday();
+            else renderActiveDashboard();
+
+            const dCanvas = document.getElementById('dash-canvas');
+            const mainCanvas = document.getElementById('canvas');
+            if (mainCanvas && dCanvas) {
+                mainCanvas.width = 212;
+                mainCanvas.height = 104;
+                mainCanvas.getContext('2d').drawImage(dCanvas, 0, 0);
+            }
+            const imageBytes = canvas2bytes_bw(dCanvas);
+            const totalSize = imageBytes.length;
+
+            // 2. Tự động kết nối GATT tới đồng hồ đã chọn (không cần duy trì kết nối trước đó)
+            if (pushBtn) pushBtn.innerHTML = `<i class="fa fa-bluetooth-b"></i> Đang kết nối ${targetDev.name}...`;
+            let gattServer = targetDev.gatt;
+            if (!gattServer.connected) {
+                gattServer = await targetDev.gatt.connect();
+            }
+            const service = await gattServer.getPrimaryService(SVC_UUID);
+            const char = await service.getCharacteristic(CHR_UUID);
+
+            // 3. Truyền gói ảnh 2756 bytes (0x80 -> 0x81 -> 0x82 với cờ RAM = 0)
+            if (pushBtn) pushBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Đang đẩy ảnh xuống E-Ink...';
+            let buf = new Uint8Array(136);
+            let view = new DataView(buf.buffer);
+            buf.fill(0xff);
+            buf[0] = 0x80;
+            view.setUint32(2, totalSize, true);
+            await char.writeValue(buf);
+
+            let sent = 0;
+            for (let i = 0; i < totalSize; i += 128) {
+                buf.fill(0xff);
+                buf[0] = 0x81;
+                view.setUint16(1, sent, false);
+                const chunk = imageBytes.slice(sent, sent + 128);
+                buf.set(chunk, 8);
+                buf[3] = chunk.length;
+                await char.writeValue(buf);
+                sent += chunk.length;
+            }
+
+            buf.fill(0);
+            buf[0] = 0x82;
+            buf[1] = 0; // Chỉ lưu RAM (0), bảo vệ tuổi thọ SPI Flash
+            await char.writeValue(buf);
+
+            // Chờ 400ms để đồng hồ nhận trọn gói cuối trước khi ngắt kết nối BLE
+            await new Promise(r => setTimeout(r, 400));
+
+            // 4. Ngắt kết nối BLE ngay lập tức để giải phóng đồng hồ & tiết kiệm pin
+            if (targetDev.gatt && targetDev.gatt.connected) {
+                targetDev.gatt.disconnect();
+            }
+
+            const badge = document.getElementById('dash-target-device-badge');
+            const nowStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            if (badge) {
+                badge.textContent = `${targetDev.name} • Đã đẩy & Ngắt BLE (${nowStr})`;
+                badge.className = "px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300";
+            }
+
+            if (currentDashMode === 'daily' && document.getElementById('daily-layout-select')?.value === 'auto') {
+                dailyAutoToggleIdx++;
+            }
+            console.log(`[${nowStr}] Đã tự kết nối -> đẩy Dashboard -> ngắt kết nối BLE thành công (${targetDev.name})!`);
+        } catch (err) {
+            console.error('Lỗi tự động kết nối/gửi Live Dashboard:', err);
+            alert('Không thể kết nối hoặc gửi ảnh tới đồng hồ: ' + err.message);
+        } finally {
+            if (pushBtn) {
+                pushBtn.disabled = false;
+                pushBtn.innerHTML = '<i class="fa fa-paper-plane"></i> Kết nối & Đẩy xuống ngay';
+            }
+        }
+    }
+
+    async function toggleDashboardAutoSync() {
+        const btn = document.getElementById('dash-auto-btn');
+        const badge = document.getElementById('dash-auto-badge');
+        const mins = parseInt(document.getElementById('dash-interval-select')?.value || '15');
+
+        if (dashAutoTimer) {
+            clearInterval(dashAutoTimer);
+            dashAutoTimer = null;
+            if (btn) {
+                btn.className = "bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all";
+                btn.innerHTML = '<i class="fa fa-play"></i> Bật tự động cập nhật';
+            }
+            if (badge) badge.classList.add('hidden');
+            return;
+        }
+
+        // Đảm bảo đã chọn thiết bị ít nhất 1 lần trước khi bật hẹn giờ tự động
+        if (!savedBleDevice && !device) {
+            const picked = await selectBleDeviceForDashboard();
+            if (!picked) return;
+        }
+
+        // Đẩy ngay lần đầu tiên (Tự kết nối -> Gửi -> Tự ngắt)
+        pushDashboardNow();
+
+        dashAutoTimer = setInterval(() => {
+            pushDashboardNow();
+        }, mins * 60 * 1000);
+
+        if (btn) {
+            btn.className = "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all";
+            btn.innerHTML = `<i class="fa fa-stop"></i> Dừng tự động (${mins} phút/lần)`;
+        }
+        if (badge) {
+            badge.classList.remove('hidden');
+            document.getElementById('dash-auto-countdown').textContent = `Tự kết nối -> Đẩy -> Ngắt mỗi ${mins} phút`;
+        }
+    }
 
     // Hàm xử lý khi người dùng bấm chọn một mẫu giao diện
     async function selectWatchFace(faceId) {
